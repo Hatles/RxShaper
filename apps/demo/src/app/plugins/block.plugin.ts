@@ -63,7 +63,7 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
       // // Listen to changes of startFrom, timerLabel or displayLabels managed by the traits
       init() {
         console.log('init');
-        const events = component.inputs.map(input => 'change:' + (typeof input === "string" ? input : input.name)).join(' ');
+        const events = component.inputs.map(input => 'change:attributes:' + input.name).join(' ');
         this.listenTo(this.model, events, this.handleChanges);
       },
       //
@@ -74,7 +74,7 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
         if (component.inputs) {
           const instance = componentRef.instance;
           component.inputs.forEach(input => {
-            instance[input.name] = input.changeProp ? this.model.attributes[input.name] : this.model.attributes.attributes[input.name];
+            instance[input.name] = this.model.attributes.attributes[input.name];
           });
 
           componentRef.changeDetectorRef.detectChanges();
@@ -123,42 +123,42 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
       //   // this.handleChanges();
       //   applicationRef.attachView(componentRef.hostView);
       },
-      // getInjector() {
-      //   const angularParent = this.getClosestAngularComponent();
-      //
-      //   return angularParent ? angularParent.injector : injector;
-      // },
-      // getInjectorAndParent(): {injector: Injector, parent: ComponentRef<any>} {
-      //   const angularParent = this.getClosestAngularComponent();
-      //
-      //   return {injector: angularParent ? angularParent.injector : injector, parent: angularParent};
-      // },
-      // getClosestAngularComponent(): ComponentRef<any> {
-      //   if (this.closestAngularComponent) {
-      //     return this.closestAngularComponent;
-      //   }
-      //
-      //   const parent = this.findClosest((parent) => !!parent.view.componentRef)
-      //
-      //   this.closestAngularComponent = parent ? parent.view.componentRef : null;
-      //
-      //   return this.closestAngularComponent;
-      // },
-      // findClosest(search: (model) => boolean) {
-      //   let parent = this.model.parent();
-      //
-      //   while (parent && !search(parent)) {
-      //     parent = parent.parent();
-      //   }
-      //
-      //   return parent;
-      // },
+      getInjector() {
+        const angularParent = this.getClosestAngularComponent();
+
+        return angularParent ? angularParent.injector : injector;
+      },
+      getInjectorAndParent(): {injector: Injector, parent: ComponentRef<any>} {
+        const angularParent = this.getClosestAngularComponent();
+
+        return {injector: angularParent ? angularParent.injector : injector, parent: angularParent};
+      },
+      getClosestAngularComponent(): ComponentRef<any> {
+        if (this.closestAngularComponent) {
+          return this.closestAngularComponent;
+        }
+
+        const parent = this.findClosest((parent) => !!parent.view.componentRef)
+
+        this.closestAngularComponent = parent ? parent.view.componentRef : null;
+
+        return this.closestAngularComponent;
+      },
+      findClosest(search: (model) => boolean) {
+        let parent = this.model.parent();
+
+        while (parent && !search(parent)) {
+          parent = parent.parent();
+        }
+
+        return parent;
+      },
       onRender(opts) {
-        const el = opts.el;
-        console.log('onRender', opts);
-        const componentFactory = factory.resolveComponentFactory(component.class);
-        const componentRef = componentFactory.create(injector, [], el);
-        this.componentRef = componentRef;
+        // const el = opts.el;
+        // console.log('onRender', opts);
+        // const componentFactory = factory.resolveComponentFactory(component.class);
+        // const componentRef = componentFactory.create(injector, [], el);
+        // this.componentRef = componentRef;
 
         // const {injector, parent} = this.getInjectorAndParent();
         //
@@ -176,66 +176,66 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
         //   console.log(view);
         // } else {
         //   applicationRef.attachView(this.componentRef.hostView);
-          viewContainerRef.insert(this.componentRef.hostView);
         // }
 
-        // this.handleChanges(this, true);
+        viewContainerRef.insert(this.componentRef.hostView);
+        this.handleChanges(this, true);
       },
-      // getChildrenContainerRef(): ViewContainerRef {
-      //   const componentRef: ComponentRef<any> = this.componentRef;
-      //   const instance = componentRef ? componentRef.instance : null;
-      //
-      //   if (instance && instance.getContainerRef) {
-      //     return instance.getContainerRef();
-      //   }
-      //
-      //   return null;
-      // },
-      // getChildrenContainer(): HTMLElement {
-      //   const componentRef: ComponentRef<any> = this.componentRef;
-      //   const instance = componentRef ? componentRef.instance : null;
-      //
-      //   if (instance && instance.getContainer) {
-      //     return instance.getContainer();
-      //   }
-      //
-      //   let container = this.el;
-      //
-      //   if (typeof this.getChildrenSelector == 'function') {
-      //     container = this.el.querySelector(this.getChildrenSelector());
-      //   } else if (typeof this.getTemplate == 'function') {
-      //     // Need to find deepest first child
-      //   }
-      //
-      //   return container;
-      // },
-      // renderChildren(opts) {
-      //   const { em, model, modelOpt } = this;
-      //
-      //   if (!modelOpt.temporary) {
-      //     this.preRender(this._clbObj());
-      //     em && em.trigger('component:mount', model);
-      //   }
-      //
-      //   console.log('renderChildren', opts);
-      //   // this.updateContent();
-      //   const container = this.getChildrenContainer();
-      //   const view =
-      //     this.childrenView ||
-      //     new domc.ComponentsView({
-      //       collection: this.model.get('components'),
-      //       config: this.config,
-      //       componentTypes: this.opts.componentTypes
-      //     });
-      //
-      //   view.render(container);
-      //   this.childrenView = view;
-      //   const childNodes = Array.prototype.slice.call(view.el.childNodes);
-      //
-      //   for (let i = 0, len = childNodes.length; i < len; i++) {
-      //     renderer.appendChild(container, childNodes.shift());
-      //   }
-      // },
+      getChildrenContainerRef(): ViewContainerRef {
+        const componentRef: ComponentRef<any> = this.componentRef;
+        const instance = componentRef ? componentRef.instance : null;
+
+        if (instance && instance.getContainerRef) {
+          return instance.getContainerRef();
+        }
+
+        return null;
+      },
+      getChildrenContainer(): HTMLElement {
+        const componentRef: ComponentRef<any> = this.componentRef;
+        const instance = componentRef ? componentRef.instance : null;
+
+        if (instance && instance.getContainer) {
+          return instance.getContainer();
+        }
+
+        let container = this.el;
+
+        if (typeof this.getChildrenSelector == 'function') {
+          container = this.el.querySelector(this.getChildrenSelector());
+        } else if (typeof this.getTemplate == 'function') {
+          // Need to find deepest first child
+        }
+
+        return container;
+      },
+      renderChildren(opts) {
+        const { em, model, modelOpt } = this;
+
+        if (!modelOpt.temporary) {
+          this.preRender(this._clbObj());
+          em && em.trigger('component:mount', model);
+        }
+
+        console.log('renderChildren', opts);
+        // this.updateContent();
+        const container = this.getChildrenContainer();
+        const view =
+          this.childrenView ||
+          new domc.ComponentsView({
+            collection: this.model.get('components'),
+            config: this.config,
+            componentTypes: this.opts.componentTypes
+          });
+
+        view.render(container);
+        this.childrenView = view;
+        const childNodes = Array.prototype.slice.call(view.el.childNodes);
+
+        for (let i = 0, len = childNodes.length; i < len; i++) {
+          renderer.appendChild(container, childNodes.shift());
+        }
+      },
       removed() {
         console.log('removed', this.componentRef);
         if (this.componentRef) {

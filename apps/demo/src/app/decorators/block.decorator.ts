@@ -96,8 +96,7 @@ export interface BlockInput {
   type?: string, // Type of the trait
   label?: string, // The label you will see in Settings
   name: string, // The name of the attribute/property to use on component
-  options?: { id: string, name: string}[],
-  changeProp?: boolean,
+  options?: { id: string, name: string}[]
 }
 
 export type Trait = BlockInput | string;
@@ -157,8 +156,6 @@ export function buildComponentInput(options?: Trait) {
 }
 export function addComponentInput(component: Type<any>, options: BlockInput) {
   const current = components.find(item => item.class === component);
-
-  options.changeProp = true;
 
   if (current) {
     if (!current.inputs) {
