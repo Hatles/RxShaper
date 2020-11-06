@@ -1,10 +1,29 @@
-import { Component } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
+import { GetContentOptions } from '@builder.io/sdk';
 
 @Component({
-  selector: 'builderify-root',
+  selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
-  title = 'demo';
+  title = 'app';
+  options: GetContentOptions = {
+    cacheSeconds: 1,
+  };
+
+  data = {
+    property: 'hello',
+    fn: (text: string) => alert(text),
+  };
+
+  editor;
+
+  load(event: any) {
+    console.log('load', event);
+  }
+
+  error(event: any) {
+    console.log('error', event);
+  }
 }
