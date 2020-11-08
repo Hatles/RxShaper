@@ -1,16 +1,21 @@
-<div>
-  <div>angular block works! {{test}} {{test2}}</div>
+<div class="block">
+<!--  <div>angular block works! {{test}} {{test2}}</div>-->
+  <div>angular block works! {{test}}</div>
+  <div>level: {{level}}</div>
   <button (click)="doSomething()">do something</button>
-  <div *ngIf="parent">parent props: {{parent.test}} {{parent.test2}}</div>
+  <div *ngIf="parent">parent props: {{parent.test}}</div>
   <div *ngIf="children.length">children:
-    <div *ngFor="let child of children">child props: {{child.test}} {{child.test2}}</div>
+    <div *ngFor="let child of children">child props: {{child.test}}</div>
   </div>
   <div *ngIf="children2.length">children2:
-    <div *ngFor="let child of children2">child props: {{child.test}} {{child.test2}}</div>
+    <div *ngFor="let child of children2">child props: {{child.test}}</div>
   </div>
-</div>
-<div #container>
-  <ng-container #containerRef></ng-container>
+
+
+  <div class="block-children-container" #container>
+    <ng-container #containerRef></ng-container>
+    <ng-content></ng-content>
+  </div>
 </div>
 <!--<builderify-block *ngIf="hasChild" test="child"></builderify-block>-->
 <!--<ng-template builderifyChildrenHost></ng-template>-->

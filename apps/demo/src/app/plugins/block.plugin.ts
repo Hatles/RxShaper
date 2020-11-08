@@ -7,7 +7,7 @@ import {
   Type,
   ViewContainerRef
 } from "@angular/core";
-import {AngularComponent, BlockComponent} from "../decorators/block.decorator";
+import {AngularComponentType, ComponentType} from "../decorators/block.decorator";
 import {Plugin} from "./plugin";
 
 export interface BlockPluginOptions {
@@ -16,14 +16,14 @@ export interface BlockPluginOptions {
   viewContainerRef: ViewContainerRef;
   renderer: Renderer2;
 
-  components: AngularComponent[]
+  components: AngularComponentType[]
 }
 
 export const blockPlugin: Plugin<BlockPluginOptions> = (editor, options) => {
   options.components.forEach(component => addComponentType(component, editor, options.injector, options.factory, options.viewContainerRef, options.renderer));
 }
 
-function addComponentType(component: BlockComponent, editor, injector: Injector, factory: ComponentFactoryResolver, viewContainerRef: ViewContainerRef, renderer: Renderer2) {
+function addComponentType(component: ComponentType, editor, injector: Injector, factory: ComponentFactoryResolver, viewContainerRef: ViewContainerRef, renderer: Renderer2) {
   // const injector = this.injector;
   // const factory = this.factory;
   // const applicationRef = this.applicationRef;
@@ -39,8 +39,7 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
     model: defaultModel.extend({
       defaults: {
         ...defaultModel.prototype.defaults,
-        labels: {
-        },
+        labels: {},
         droppable: component.canHaveChildren,
         traits: [
           ...component.inputs
@@ -99,36 +98,36 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
         const componentRef = componentFactory.create(this.getInjector(), [], el);
         this.componentRef = componentRef;
 
-      //   // const {injector, parent} = this.getInjectorAndParent();
-      //   // if (parent) {
-      //   //   let viewContainerRef: ViewContainerRef;
-      //   //
-      //   //   if (parent.instance.getContainer) {
-      //   //     viewContainerRef = parent.instance.getContainer();
-      //   //   }
-      //   //   if (!viewContainerRef) {
-      //   //     viewContainerRef = injector.get(ViewContainerRef);
-      //   //   }
-      //   //
-      //   //   this.componentRef = viewContainerRef.createComponent(componentFactory);
-      //   //   renderer.appendChild(el, this.componentRef.location.nativeElement);
-      //   //   console.log(el, this.componentRef.location.nativeElement);
-      //   // } else {
-      //   //   const componentRef = componentFactory.create(this.getInjector(), [], el);
-      //   //   this.componentRef = componentRef;
-      //   //
-      //   //   applicationRef.attachView(this.componentRef.hostView);
-      //   // }
-      //
-      //   // this.handleChanges();
-      //   applicationRef.attachView(componentRef.hostView);
+        //   // const {injector, parent} = this.getInjectorAndParent();
+        //   // if (parent) {
+        //   //   let viewContainerRef: ViewContainerRef;
+        //   //
+        //   //   if (parent.instance.getContainer) {
+        //   //     viewContainerRef = parent.instance.getContainer();
+        //   //   }
+        //   //   if (!viewContainerRef) {
+        //   //     viewContainerRef = injector.get(ViewContainerRef);
+        //   //   }
+        //   //
+        //   //   this.componentRef = viewContainerRef.createComponent(componentFactory);
+        //   //   renderer.appendChild(el, this.componentRef.location.nativeElement);
+        //   //   console.log(el, this.componentRef.location.nativeElement);
+        //   // } else {
+        //   //   const componentRef = componentFactory.create(this.getInjector(), [], el);
+        //   //   this.componentRef = componentRef;
+        //   //
+        //   //   applicationRef.attachView(this.componentRef.hostView);
+        //   // }
+        //
+        //   // this.handleChanges();
+        //   applicationRef.attachView(componentRef.hostView);
       },
       getInjector() {
         const angularParent = this.getClosestAngularComponent();
 
         return angularParent ? angularParent.injector : injector;
       },
-      getInjectorAndParent(): {injector: Injector, parent: ComponentRef<any>} {
+      getInjectorAndParent(): { injector: Injector, parent: ComponentRef<any> } {
         const angularParent = this.getClosestAngularComponent();
 
         return {injector: angularParent ? angularParent.injector : injector, parent: angularParent};
@@ -210,7 +209,7 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
         return container;
       },
       renderChildren(opts) {
-        const { em, model, modelOpt } = this;
+        const {em, model, modelOpt} = this;
 
         if (!modelOpt.temporary) {
           this.preRender(this._clbObj());
@@ -253,6 +252,6 @@ function addComponentType(component: BlockComponent, editor, injector: Injector,
     // content: `
     //     <div data-gjs-type="${typeRef}"></div>
     //   `
-    content: { type: typeRef }
+    content: {type: typeRef}
   });
 }

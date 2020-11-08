@@ -1,5 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import { GetContentOptions } from '@builder.io/sdk';
+import {BuilderService} from "@builder.io/angular";
+import {BuilderifyService} from "./services/builderify.service";
+import {ComponentBlock} from "./components/builder/builder.component";
+// import components from "./data/components.json";
+import {components} from "./data/components";
 
 @Component({
   selector: 'app-root',
@@ -10,6 +15,7 @@ export class AppComponent {
   title = 'app';
   options: GetContentOptions = {
     cacheSeconds: 1,
+    prerender: false
   };
 
   data = {
@@ -18,6 +24,12 @@ export class AppComponent {
   };
 
   editor;
+  components: ComponentBlock[];
+
+
+  constructor(service: BuilderService, service2: BuilderifyService) {
+    this.components = components;
+  }
 
   load(event: any) {
     console.log('load', event);

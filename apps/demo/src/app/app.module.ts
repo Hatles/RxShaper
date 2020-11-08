@@ -1,7 +1,7 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { BuilderModule } from '@builder.io/angular';
+import {BuilderModule, BuilderService} from '@builder.io/angular';
 
 import { AppComponent } from './app.component';
 import { FooComponent } from './foo.component';
@@ -9,9 +9,12 @@ import {CustomThingComponent} from "./custom-thing.component";
 import { BuilderComponent } from './components/builder/builder.component';
 import { BlockComponent } from './components/block/block.component';
 import { ChildrenHostDirective } from './directives/children-host.directive';
+import { RendererComponent } from './components/renderer/renderer.component';
+import { BlockRendererComponent } from './components/block-renderer/block-renderer.component';
+import {BuilderifyService} from "./services/builderify.service";
 
 @NgModule({
-  declarations: [AppComponent, FooComponent, CustomThingComponent, BuilderComponent, BlockComponent, ChildrenHostDirective],
+  declarations: [AppComponent, FooComponent, CustomThingComponent, BuilderComponent, BlockComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
@@ -23,7 +26,9 @@ import { ChildrenHostDirective } from './directives/children-host.directive';
       },
     ]),
   ],
-  providers: [],
+  providers: [
+    BuilderifyService
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

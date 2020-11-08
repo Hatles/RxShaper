@@ -8,7 +8,8 @@ import {
   SkipSelf, TemplateRef,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
-import {Builder, Trait} from "../../decorators/block.decorator";
+import {ComponentBuilder, Trait} from "../../decorators/block.decorator";
+import {BuilderBlock} from "@builder.io/angular";
 
 export interface HasContainer {
   getContainer(): HTMLElement
@@ -17,7 +18,21 @@ export interface HasContainerRef {
   getContainerRef(): ViewContainerRef
 }
 
-@Builder({tag: 'block', name: 'Block', canHaveChildren: true})
+@BuilderBlock({
+  tag: 'block-test',
+  name: 'Block',
+  inputs: [
+    {
+      name: 'test',
+      type: 'string',
+    },
+    {
+      name: 'test2',
+      type: 'string',
+    },
+  ],
+})
+@ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})
 @Component({
   selector: 'builderify-block',
   templateUrl: './block.component.html',
@@ -46,11 +61,20 @@ export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
   @Input()
   test2: string;
 
+  level: number;
+
   // @Trait()
   // @Input()
   // hasChild: boolean;
 
-  constructor(@Optional() @SkipSelf() public parent: BlockComponent, private factory: ComponentFactoryResolver) { }
+  constructor(@Optional() @SkipSelf() public parent: BlockComponent, private factory: ComponentFactoryResolver) {
+    if (this.parent) {
+      this.level = this.parent.level + 1;
+    }
+    else {
+      this.level = 1;
+    }
+  }
 
   ngOnInit(): void {
     this.children.changes.subscribe(e => {

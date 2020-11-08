@@ -1,10 +1,10 @@
 import {Input, Type} from "@angular/core";
 
-export interface AngularComponent extends BlockComponent {
+export interface AngularComponentType extends ComponentType {
   tag: string;
 }
 
-export interface BlockComponent {
+export interface ComponentType {
   /**
    * Name your component something unique, e.g. 'MyButton'. You can override built-in components
    * by registering a component with the same name, e.g. 'Text', to replace the built-in text component
@@ -101,22 +101,22 @@ export interface BlockInput {
 
 export type Trait = BlockInput | string;
 
-export function Builder(options: AngularComponent) {
+export function ComponentBuilder(options: AngularComponentType) {
   options.type = 'angular';
 
   // return Builder.Component(options);
   return buildComponent(options);
 }
 
-export const components: AngularComponent[] = [];
+export const components: AngularComponentType[] = [];
 
-export function buildComponent(options: AngularComponent) {
+export function buildComponent(options: AngularComponentType) {
   return (component: Type<any>) => {
     addComponent({...options, class: component});
   }
 }
 
-export function addComponent(component: AngularComponent) {
+export function addComponent(component: AngularComponentType) {
   const current = components.find(item => item.name === component.name);
   if (current) {
     // // FIXME: why does sometimes we get an extra post without class - probably

@@ -3,11 +3,11 @@ import {
   Component,
   ComponentFactoryResolver,
   ElementRef,
-  EventEmitter, Injector,
+  EventEmitter, InjectionToken, Injector,
   Input,
   OnDestroy,
   OnInit,
-  Output, Renderer2,
+  Output, Renderer2, Self,
   Type,
   ViewChild, ViewContainerRef
 } from '@angular/core';
@@ -18,8 +18,10 @@ import GrapesJS, {Editor as IEditor} from 'grapesjs/dist/grapes.js';
 import webpage from 'grapesjs-preset-webpage';
 import grapesjsTooltip from 'grapesjs-tooltip';
 import {blockPlugin} from "../../plugins/block.plugin";
-import {components} from "../../decorators/block.decorator";
+import {ComponentBuilder, components} from "../../decorators/block.decorator";
 import {exportPlugin} from "../../plugins/export.plugin";
+import {DefaultTheme} from "@material-ui/styles/defaultTheme";
+import {Styles} from "@material-ui/styles/withStyles";
 // export type SupportedPresetType = 'webpage' | 'newsletter' | 'mjml';
 
 // const presets: Record<SupportedPresetType, any> = {
@@ -27,6 +29,34 @@ import {exportPlugin} from "../../plugins/export.plugin";
 //   newsletter,
 //   mjml,
 // };
+
+export interface Builder {
+  DomComponents: any;
+}
+export const BUILDER = new InjectionToken<Builder>('BUILDER')
+
+// export type ComponentBlockStyle<Theme = DefaultTheme, ClassKey extends string = string> = Styles<Theme, {}, ClassKey>;
+
+export interface ComponentBlockStyle {
+  [key: string]: string|number
+}
+
+export interface ComponentBlockStyles {
+  large?: ComponentBlockStyle;
+  medium?: ComponentBlockStyle;
+  small?: ComponentBlockStyle;
+  custom?: string;
+}
+
+export interface ComponentBlock {
+  type: string;
+  id?: string;
+  class?: string[];
+  options?: any
+  children?: ComponentBlock[]
+  bindings?: any[]
+  style?: ComponentBlockStyles
+}
 
 export interface BuilderOptions {
   container?: any;
@@ -56,14 +86,21 @@ export interface BuilderOptions {
   // onDestroy?(editor: IEditor): void;
 }
 
+export function builderFactory(builder: BuilderComponent): Builder {
+  return builder.editor;
+}
+
 @Component({
   selector: 'builderify-builder',
   templateUrl: './builder.component.html',
-  styleUrls: ['./builder.component.scss']
+  styleUrls: ['./builder.component.scss'],
+  providers: [
+    {provide: BUILDER, useFactory: builderFactory, deps: [BuilderComponent]}
+  ]
 })
 export class BuilderComponent implements OnInit, OnDestroy {
 
-  private editor: IEditor;
+  editor: IEditor;
 
   @ViewChild('builder', {static: true})
   builder: ElementRef<HTMLDivElement>;
@@ -87,6 +124,8 @@ export class BuilderComponent implements OnInit, OnDestroy {
   init: EventEmitter<IEditor> = new EventEmitter<IEditor>();
   @Output()
   destroy: EventEmitter<IEditor> = new EventEmitter<IEditor>();
+
+  components: ComponentBlock[] = [];
 
   constructor(
     private injector: Injector,
@@ -119,6 +158,8 @@ export class BuilderComponent implements OnInit, OnDestroy {
     // });
     this.init.next(this.editor);
     this.init.complete();
+
+    this.onExport();
   }
 
   ngOnDestroy(): void {
@@ -234,6 +275,7 @@ export class BuilderComponent implements OnInit, OnDestroy {
   onExport() {
     const components = this.getComponents();
     console.log(components);
+    this.components = components.components;
   }
 
   getComponents() {
