@@ -12,8 +12,9 @@ import { RendererComponent } from './components/renderer/renderer.component';
 import { BlockRendererComponent } from './components/block-renderer/block-renderer.component';
 import {RxShaperService} from "./services/rxshaper.service";
 import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
+import {ComponentBuilder} from "./decorators/block.decorator";
 
-const components = [BlockComponent]; // needed for aot compilation
+const components = [BlockComponent]; // needed for aot compilation, not working in prod
 
 @NgModule({
   declarations: [...components, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
@@ -33,4 +34,7 @@ const components = [BlockComponent]; // needed for aot compilation
   bootstrap: [AppComponent],
 })
 export class AppModule {
+  constructor() {
+    ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})(BlockComponent); // temp fix for aot prod compilation
+  }
 }

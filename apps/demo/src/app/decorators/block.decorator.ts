@@ -18,6 +18,7 @@ export function buildComponent(options: AngularComponentType) {
 
 export function addComponent(component: AngularComponentType) {
   const current = RxShaperService.Components.find(item => item.name === component.name);
+  console.log("addComponent", component, current);
   if (current) {
     // // FIXME: why does sometimes we get an extra post without class - probably
     // // from postMessage handler wrong in some place
