@@ -5,11 +5,10 @@ import {
   OnInit,
   Optional, Output,
   QueryList,
-  SkipSelf, TemplateRef,
+  SkipSelf,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
 import {BuilderBlockOutput, ComponentBuilder, Trait} from "../../decorators/block.decorator";
-import {BuilderBlock} from "@builder.io/angular";
 
 export interface HasContainer {
   getContainer(): HTMLElement
@@ -18,20 +17,6 @@ export interface HasContainerRef {
   getContainerRef(): ViewContainerRef
 }
 
-@BuilderBlock({
-  tag: 'block-test',
-  name: 'Block',
-  inputs: [
-    {
-      name: 'test',
-      type: 'string',
-    },
-    {
-      name: 'test2',
-      type: 'string',
-    },
-  ],
-})
 @ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})
 @Component({
   selector: 'rxshaper-block',

@@ -6,7 +6,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
-import {BuilderifyService} from "../../services/rxshaper.service";
+import {RxShaperService} from "../../services/rxshaper.service";
 import {ComponentType} from "../../decorators/block.decorator";
 import {DOCUMENT} from "@angular/common";
 import {fromEvent, Observable, ReplaySubject, Subject, Subscription} from "rxjs";
@@ -294,7 +294,7 @@ export class BlockRendererService {
     private injector: Injector,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document,
-    private builder: BuilderifyService,
+    private builder: RxShaperService,
     @Optional() @SkipSelf() private parent?: BlockRendererService
   ) {
     if (parent) {

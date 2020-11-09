@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {components, ComponentType} from "../decorators/block.decorator";
 
 @Injectable()
-export class BuilderifyService {
+export class RxShaperService {
   private get components(): ComponentType[] {
     return components;
   }
