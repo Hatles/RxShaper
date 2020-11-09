@@ -1,6 +1,6 @@
 import {
   Component,
-  ComponentFactoryResolver,
+  ComponentFactoryResolver, Directive,
   Inject,
   Injector,
   Input,
@@ -16,12 +16,10 @@ import {BuilderifyService} from "../../services/builderify.service";
 import {DOCUMENT} from "@angular/common";
 import {BlockRendererService} from "./block-renderer.service";
 
-@Component({
-  selector: 'builderify-block-renderer',
-  templateUrl: './block-renderer.component.html',
-  styleUrls: ['./block-renderer.component.scss']
+@Directive({
+  selector: '[builderifyBlockRenderer]'
 })
-export class BlockRendererComponent implements OnInit, OnDestroy {
+export class BlockRendererDirective implements OnInit, OnDestroy {
 
   @Input()
   component: ComponentBlock;
@@ -44,7 +42,7 @@ export class BlockRendererComponent implements OnInit, OnDestroy {
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document,
     private builder: BuilderifyService,
-    @Optional() @SkipSelf() private parent?: BlockRendererComponent
+    @Optional() @SkipSelf() private parent?: BlockRendererDirective
   ) {
     this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
   }
@@ -54,6 +52,6 @@ export class BlockRendererComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.service.onDestroy();
+    this.service.onDestroy()
   }
 }

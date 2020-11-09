@@ -47,6 +47,14 @@ export interface ComponentBlockStyles {
   small?: ComponentBlockStyle;
   custom?: string;
 }
+export type ComponentBlockContainerLayout = 'row' | 'column' | 'grid';
+
+export interface ComponentBlockBindings {
+  [key: string]: string
+}
+export interface ComponentBlockActions {
+  [key: string]: string
+}
 
 export interface ComponentBlock {
   type: string;
@@ -54,8 +62,11 @@ export interface ComponentBlock {
   class?: string[];
   options?: any
   children?: ComponentBlock[]
-  bindings?: any[]
+  childrenContainerLayout?: ComponentBlockContainerLayout
+  bindings?: ComponentBlockBindings
+  actions?: ComponentBlockActions
   style?: ComponentBlockStyles
+  script?: string
 }
 
 export interface BuilderOptions {

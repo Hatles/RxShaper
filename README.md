@@ -1,5 +1,14 @@
 # Builderify
 
+## Keep In Mind
+https://github.com/microsoft/monaco-editor : text code editor
+
+https://rete.js.org/ : workflow code editor
+
+https://editorjs.io/ : js block page editor (single column, no nested block :( )
+
+------
+
 This project was generated using [Nx](https://nx.dev).
 
 <p align="center"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="450"></p>

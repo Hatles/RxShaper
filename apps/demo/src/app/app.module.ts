@@ -12,9 +12,10 @@ import { ChildrenHostDirective } from './directives/children-host.directive';
 import { RendererComponent } from './components/renderer/renderer.component';
 import { BlockRendererComponent } from './components/block-renderer/block-renderer.component';
 import {BuilderifyService} from "./services/builderify.service";
+import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
 
 @NgModule({
-  declarations: [AppComponent, FooComponent, CustomThingComponent, BuilderComponent, BlockComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent],
+  declarations: [AppComponent, FooComponent, CustomThingComponent, BuilderComponent, BlockComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,

@@ -46,7 +46,9 @@
     "grapesjs": "^0.16.27",
     "grapesjs-preset-webpage": "^0.1.11",
     "grapesjs-tooltip": "^0.1.5",
+    "require-like": "^0.1.2",
     "rxjs": "~6.5.5",
+    "vm-browserify": "^1.1.2",
     "zone.js": "^0.10.2"
   },
   "devDependencies": {

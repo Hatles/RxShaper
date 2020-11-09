@@ -1,14 +1,14 @@
 import {
   Component, ComponentFactoryResolver,
-  ContentChildren, ElementRef,
+  ContentChildren, ElementRef, EventEmitter,
   Input,
   OnInit,
-  Optional,
+  Optional, Output,
   QueryList,
   SkipSelf, TemplateRef,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
-import {ComponentBuilder, Trait} from "../../decorators/block.decorator";
+import {BuilderBlockOutput, ComponentBuilder, Trait} from "../../decorators/block.decorator";
 import {BuilderBlock} from "@builder.io/angular";
 
 export interface HasContainer {
@@ -61,7 +61,13 @@ export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
   @Input()
   test2: string;
 
+  @BuilderBlockOutput()
+  @Output()
+  doSomething: EventEmitter<any> = new EventEmitter<any>();
+
   level: number;
+
+  counter = 0;
 
   // @Trait()
   // @Input()
@@ -79,17 +85,18 @@ export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
   ngOnInit(): void {
     this.children.changes.subscribe(e => {
       console.log("children", e);
-    })
+    });
     this.children2.changes.subscribe(e => {
       console.log("children2", e);
-    })
+    });
 
     // const componentFactory = this.factory.resolveComponentFactory<BlockComponent>(BlockComponent);
     // const component = this.container.createComponent(componentFactory);
   }
 
-  doSomething() {
-    console.log(this.test, this.test2);
+  onDoSomething() {
+    this.counter++;
+    this.doSomething.emit({test: this.test, counter: this.counter});
   }
 
   getContainer(): HTMLElement {
@@ -99,4 +106,5 @@ export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
   getContainerRef(): ViewContainerRef {
     return this.containerRef;
   }
+
 }

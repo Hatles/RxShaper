@@ -1,8 +1,8 @@
 <div class="block">
 <!--  <div>angular block works! {{test}} {{test2}}</div>-->
   <div>angular block works! {{test}}</div>
-  <div>level: {{level}}</div>
-  <button (click)="doSomething()">do something</button>
+  <div>level: {{level}} | counter: {{counter}}</div>
+  <button (click)="onDoSomething()">do something</button>
   <div *ngIf="parent">parent props: {{parent.test}}</div>
   <div *ngIf="children.length">children:
     <div *ngFor="let child of children">child props: {{child.test}}</div>

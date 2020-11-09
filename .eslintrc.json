@@ -29,7 +29,8 @@
           { "sourceTag": "*", "onlyDependOnLibsWithTags": ["*"] }
         ]
       }
-    ]
+    ],
+    "semi": "warn"
   },
   "overrides": [
     {

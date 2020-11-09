@@ -20,6 +20,7 @@ export interface ComponentType {
    * Input schema for your component for users to fill in the options
    */
   inputs?: BlockInput[];
+  outputs?: BlockOutput[];
   class?: any;
   type?: 'angular' | 'webcomponent' | 'react' | 'vue';
   defaultStyles?: { [key: string]: string };
@@ -113,7 +114,7 @@ export const components: AngularComponentType[] = [];
 export function buildComponent(options: AngularComponentType) {
   return (component: Type<any>) => {
     addComponent({...options, class: component});
-  }
+  };
 }
 
 export function addComponent(component: AngularComponentType) {
@@ -126,13 +127,24 @@ export function addComponent(component: AngularComponentType) {
     // }
     components.splice(this.components.indexOf(current), 1, component);
   } else {
+    // set inputs
     const inputsStored = inputsStore.find(item => item.class === component.class);
     const inputs = component.inputs ? [...component.inputs] : [];
     if (inputsStored) {
       // todo not push already set inputs
       inputs.push(...inputsStored.inputs);
     }
-    components.push({...component, inputs: inputs});
+
+    // set outputs
+    const outputsStored = outputsStore.find(item => item.class === component.class);
+    const outputs = component.outputs ? [...component.outputs] : [];
+    if (outputsStored) {
+      // todo not push already set outputs
+      outputs.push(...outputsStored.outputs);
+    }
+
+    // push new component type
+    components.push({...component, inputs: inputs, outputs: outputs});
   }
 }
 
@@ -152,7 +164,7 @@ export function buildComponentInput(options?: Trait) {
     else {
       addComponentInput(component.constructor, options || {name: key});
     }
-  }
+  };
 }
 export function addComponentInput(component: Type<any>, options: BlockInput) {
   const current = components.find(item => item.class === component);
@@ -172,7 +184,55 @@ export function addComponentInput(component: Type<any>, options: BlockInput) {
       inputsStore.push({
         class: component,
         inputs: [options]
-      })
+      });
+    }
+  }
+}
+
+export interface BlockOutput {
+  type?: string, // Type of the trait
+  label?: string, // The label you will see in Settings
+  name: string, // The name of the attribute/property to use on component
+  options?: { id: string, name: string}[]
+}
+
+export const outputsStore: { class: Type<any>, outputs: BlockOutput[] }[] = [];
+
+export function BuilderBlockOutput(options?: Trait) {
+
+  // return Builder.Component(options);
+  return buildComponentOutput(options);
+}
+
+export function buildComponentOutput(options?: Trait) {
+  return (component: {constructor: Type<any>}|any, key: string) => {
+    if (typeof options === 'string') {
+      addComponentOutput(component.constructor, key !== options ? {name: key, label: options} : {name: options});
+    }
+    else {
+      addComponentOutput(component.constructor, options || {name: key});
+    }
+  };
+}
+export function addComponentOutput(component: Type<any>, options: BlockOutput) {
+  const current = components.find(item => item.class === component);
+
+  if (current) {
+    if (!current.outputs) {
+      current.outputs = [];
+    }
+    current.outputs.push(options);
+  }
+  else {
+    const currentStored = outputsStore.find(item => item.class === component);
+    if (currentStored) {
+      currentStored.outputs.push(options);
+    }
+    else {
+      outputsStore.push({
+        class: component,
+        outputs: [options]
+      });
     }
   }
 }
