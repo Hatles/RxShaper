@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   push:
     branches:
-      - test-ci
+      - master
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
