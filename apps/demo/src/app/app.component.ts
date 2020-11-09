@@ -1,7 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import { GetContentOptions } from '@builder.io/sdk';
-import {BuilderService} from "@builder.io/angular";
-import {BuilderifyService} from "./services/rxshaper.service";
+import {Component} from '@angular/core';
+import {RxShaperService} from "./services/rxshaper.service";
 import {ComponentBlock} from "./components/builder/builder.component";
 // import components from "./data/components.json";
 import {components} from "./data/components";
@@ -13,10 +11,6 @@ import {components} from "./data/components";
 })
 export class AppComponent {
   title = 'app';
-  options: GetContentOptions = {
-    cacheSeconds: 1,
-    prerender: false
-  };
 
   data = {
     property: 'hello',
@@ -27,7 +21,7 @@ export class AppComponent {
   components: ComponentBlock[];
 
 
-  constructor(service: BuilderService, service2: BuilderifyService) {
+  constructor(service: RxShaperService) {
     this.components = components;
   }
 

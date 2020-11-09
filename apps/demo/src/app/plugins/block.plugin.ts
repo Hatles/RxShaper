@@ -1,14 +1,12 @@
 import {
-  ApplicationRef,
   ComponentFactoryResolver,
   ComponentRef,
   Injector,
   Renderer2,
-  Type,
   ViewContainerRef
 } from "@angular/core";
-import {AngularComponentType, ComponentType} from "../decorators/block.decorator";
 import {Plugin} from "./plugin";
+import {ComponentType} from "../services/component";
 
 export interface BlockPluginOptions {
   injector: Injector;
@@ -16,7 +14,7 @@ export interface BlockPluginOptions {
   viewContainerRef: ViewContainerRef;
   renderer: Renderer2;
 
-  components: AngularComponentType[]
+  components: ComponentType[]
 }
 
 export const blockPlugin: Plugin<BlockPluginOptions> = (editor, options) => {

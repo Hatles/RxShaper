@@ -12,7 +12,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
-import {BuilderifyService} from "../../services/rxshaper.service";
+import {RxShaperService} from "../../services/rxshaper.service";
 import {DOCUMENT} from "@angular/common";
 import {BlockRendererService} from "./block-renderer.service";
 
@@ -43,7 +43,7 @@ export class BlockRendererComponent implements OnInit, OnDestroy {
     private injector: Injector,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document,
-    private builder: BuilderifyService,
+    private builder: RxShaperService,
     @Optional() @SkipSelf() private parent?: BlockRendererComponent
   ) {
     this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
