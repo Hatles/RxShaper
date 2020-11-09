@@ -18,10 +18,8 @@ import GrapesJS, {Editor as IEditor} from 'grapesjs/dist/grapes.js';
 import webpage from 'grapesjs-preset-webpage';
 import grapesjsTooltip from 'grapesjs-tooltip';
 import {blockPlugin} from "../../plugins/block.plugin";
-import {ComponentBuilder, components} from "../../decorators/block.decorator";
+import {components} from "../../decorators/block.decorator";
 import {exportPlugin} from "../../plugins/export.plugin";
-import {DefaultTheme} from "@material-ui/styles/defaultTheme";
-import {Styles} from "@material-ui/styles/withStyles";
 // export type SupportedPresetType = 'webpage' | 'newsletter' | 'mjml';
 
 // const presets: Record<SupportedPresetType, any> = {
