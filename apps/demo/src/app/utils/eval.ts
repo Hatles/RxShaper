@@ -1,5 +1,4 @@
 import vm from "vm-browserify";
-import requireLike from "require-like";
 
 // const isBuffer = Buffer.isBuffer;
 
@@ -44,16 +43,17 @@ export function _eval(content, filename, scope, includeGlobals, resolve?: (value
     [key:string]: any // libs
   } = {};
   const exports = {};
-  const _filename = filename || module.parent.filename;
+  // const _filename = filename || module.parent.filename;
+  const _filename = filename;
 
-  if (includeGlobals) {
-    merge(sandbox, global);
-    // console is non-enumerable in node v10 and above
-    sandbox.console = global.console;
-    // process is non-enumerable in node v12 and above
-    sandbox.process = global.process;
-    // sandbox.require = requireLike(_filename);
-  }
+  // if (includeGlobals) {
+  //   merge(sandbox, global);
+  //   // console is non-enumerable in node v10 and above
+  //   sandbox.console = global.console;
+  //   // process is non-enumerable in node v12 and above
+  //   sandbox.process = global.process;
+  //   // sandbox.require = requireLike(_filename);
+  // }
 
   if (typeof scope === 'object') {
     merge(sandbox, scope);
@@ -76,7 +76,7 @@ export function _eval(content, filename, scope, includeGlobals, resolve?: (value
     exports: exports,
     filename: _filename,
     id: _filename,
-    parent: module.parent,
+    // parent: module.parent,
     // require: sandbox.require || requireLike(_filename)
     // export: (value) => sandbox.exports.default = value
     // returnValue: (value) => sandbox.exports.default = value

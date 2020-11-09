@@ -7,7 +7,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
-  Output, Renderer2, Self,
+  Output, Renderer2,
   Type,
   ViewChild, ViewContainerRef
 } from '@angular/core';
@@ -18,10 +18,8 @@ import GrapesJS, {Editor as IEditor} from 'grapesjs/dist/grapes.js';
 import webpage from 'grapesjs-preset-webpage';
 import grapesjsTooltip from 'grapesjs-tooltip';
 import {blockPlugin} from "../../plugins/block.plugin";
-import {ComponentBuilder, components} from "../../decorators/block.decorator";
 import {exportPlugin} from "../../plugins/export.plugin";
-import {DefaultTheme} from "@material-ui/styles/defaultTheme";
-import {Styles} from "@material-ui/styles/withStyles";
+import {RxShaperService} from "../../services/rxshaper.service";
 // export type SupportedPresetType = 'webpage' | 'newsletter' | 'mjml';
 
 // const presets: Record<SupportedPresetType, any> = {
@@ -158,7 +156,7 @@ export class BuilderComponent implements OnInit, OnDestroy {
           factory: this.factory,
           injector: this.injector,
           renderer: this.renderer,
-          components: components
+          components: RxShaperService.Components
         }),
         exportPlugin
       ]

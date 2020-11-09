@@ -23,6 +23,7 @@ jobs:
         run: |
           npm install
           npm run nx build demo -- --prod --base-href=/RxShaper/
+#          npm run nx build demo --base-href=/RxShaper/
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
