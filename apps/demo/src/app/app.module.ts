@@ -13,8 +13,10 @@ import { BlockRendererComponent } from './components/block-renderer/block-render
 import {RxShaperService} from "./services/rxshaper.service";
 import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
 
+const components = [BlockComponent]; // needed for aot compilation
+
 @NgModule({
-  declarations: [AppComponent, FooComponent, CustomThingComponent, BuilderComponent, BlockComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
+  declarations: [...components, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
@@ -30,4 +32,5 @@ import {BlockRendererDirective} from "./components/block-renderer/block-renderer
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+}

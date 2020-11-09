@@ -7,12 +7,14 @@ import {
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
 import {RxShaperService} from "../../services/rxshaper.service";
-import {ComponentType} from "../../decorators/block.decorator";
 import {DOCUMENT} from "@angular/common";
 import {fromEvent, Observable, ReplaySubject, Subject, Subscription} from "rxjs";
 import {_eval} from "../../utils/eval";
 import {filter, map, takeUntil, tap} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
+import {ComponentType} from "../../services/component";
+import {ComponentBuilder} from "../../decorators/block.decorator";
+import {BlockComponent} from "../block/block.component";
 
 // Utils
 export function generateComponentId(prefix = 'rxshaper'): string {
@@ -333,6 +335,7 @@ export class BlockRendererService {
     this.renderChildren();
 
     this.handleChanges();
+    console.log(this);
   }
 
   private fixComponent() {
