@@ -17,6 +17,9 @@ export function buildComponent(options: AngularComponentType) {
 }
 
 export function addComponent(component: AngularComponentType) {
+  // apply inputs and outputs
+  component = mergeComponentProperties(component);
+
   const current = RxShaperService.Components.find(item => item.name === component.name);
   console.log("addComponent", component, current);
   if (current) {
@@ -27,25 +30,29 @@ export function addComponent(component: AngularComponentType) {
     // }
     RxShaperService.Components.splice(RxShaperService.Components.indexOf(current), 1, component);
   } else {
-    // set inputs
-    const inputsStored = RxShaperService.InputsStore.find(item => item.class === component.class);
-    const inputs = component.inputs ? [...component.inputs] : [];
-    if (inputsStored) {
-      // todo not push already set inputs
-      inputs.push(...inputsStored.inputs);
-    }
-
-    // set outputs
-    const outputsStored = RxShaperService.OutputsStore.find(item => item.class === component.class);
-    const outputs = component.outputs ? [...component.outputs] : [];
-    if (outputsStored) {
-      // todo not push already set outputs
-      outputs.push(...outputsStored.outputs);
-    }
-
     // push new component type
-    RxShaperService.Components.push({...component, inputs: inputs, outputs: outputs});
+    RxShaperService.Components.push(component);
   }
+}
+
+export function mergeComponentProperties(component: AngularComponentType): AngularComponentType {
+  // set inputs
+  const inputsStored = RxShaperService.InputsStore.find(item => item.class === component.class);
+  const inputs = component.inputs ? [...component.inputs] : [];
+  if (inputsStored) {
+    // todo not push already set inputs
+    inputs.push(...inputsStored.inputs);
+  }
+
+  // set outputs
+  const outputsStored = RxShaperService.OutputsStore.find(item => item.class === component.class);
+  const outputs = component.outputs ? [...component.outputs] : [];
+  if (outputsStored) {
+    // todo not push already set outputs
+    outputs.push(...outputsStored.outputs);
+  }
+
+  return {...component, inputs: inputs, outputs: outputs};
 }
 
 export function Trait(options?: Trait) {

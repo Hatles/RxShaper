@@ -14,10 +14,10 @@ import {RxShaperService} from "./services/rxshaper.service";
 import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
 import {ComponentBuilder} from "./decorators/block.decorator";
 
-const components = [BlockComponent]; // needed for aot compilation, not working in prod
+// const components = [BlockComponent]; // needed for aot compilation, not working in prod
 
 @NgModule({
-  declarations: [...components, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
+  declarations: [BlockComponent, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
