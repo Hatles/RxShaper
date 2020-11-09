@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import { GetContentOptions } from '@builder.io/sdk';
 import {BuilderService} from "@builder.io/angular";
-import {BuilderifyService} from "./services/builderify.service";
+import {BuilderifyService} from "./services/rxshaper.service";
 import {ComponentBlock} from "./components/builder/builder.component";
 // import components from "./data/components.json";
 import {components} from "./data/components";

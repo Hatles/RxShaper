@@ -34,7 +34,7 @@ export interface HasContainerRef {
 })
 @ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})
 @Component({
-  selector: 'builderify-block',
+  selector: 'rxshaper-block',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss']
 })

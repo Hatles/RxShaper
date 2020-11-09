@@ -6,7 +6,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
-import {BuilderifyService} from "../../services/builderify.service";
+import {BuilderifyService} from "../../services/rxshaper.service";
 import {ComponentType} from "../../decorators/block.decorator";
 import {DOCUMENT} from "@angular/common";
 import {fromEvent, Observable, ReplaySubject, Subject, Subscription} from "rxjs";
@@ -15,7 +15,7 @@ import {filter, map, takeUntil, tap} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
 
 // Utils
-export function generateComponentId(prefix = 'builderify'): string {
+export function generateComponentId(prefix = 'rxshaper'): string {
   return (prefix ? prefix + '-' : '') + Math.random().toString(36).substr(2, 9);
 }
 
@@ -554,7 +554,7 @@ export class BlockRendererService {
       });
     }
 
-    this.renderer.addClass(this.componentRef.location.nativeElement, 'builderify-block'); // add builderify block class
+    this.renderer.addClass(this.componentRef.location.nativeElement, 'rxshaper-block'); // add rxshaper block class
     this.renderer.addClass(this.componentRef.location.nativeElement, this.component.id);
 
     if (this.component.class && this.component.class.length) {

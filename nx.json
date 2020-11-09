@@ -1,5 +1,5 @@
 {
-  "npmScope": "builderify",
+  "npmScope": "rxshaper",
   "affected": {
     "defaultBase": "master"
   },

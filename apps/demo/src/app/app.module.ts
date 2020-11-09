@@ -11,7 +11,7 @@ import { BlockComponent } from './components/block/block.component';
 import { ChildrenHostDirective } from './directives/children-host.directive';
 import { RendererComponent } from './components/renderer/renderer.component';
 import { BlockRendererComponent } from './components/block-renderer/block-renderer.component';
-import {BuilderifyService} from "./services/builderify.service";
+import {BuilderifyService} from "./services/rxshaper.service";
 import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
 
 @NgModule({

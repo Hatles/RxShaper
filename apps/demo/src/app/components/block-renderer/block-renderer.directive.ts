@@ -12,12 +12,12 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
-import {BuilderifyService} from "../../services/builderify.service";
+import {BuilderifyService} from "../../services/rxshaper.service";
 import {DOCUMENT} from "@angular/common";
 import {BlockRendererService} from "./block-renderer.service";
 
 @Directive({
-  selector: '[builderifyBlockRenderer]'
+  selector: '[rxshaperBlockRenderer]'
 })
 export class BlockRendererDirective implements OnInit, OnDestroy {
 

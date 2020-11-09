@@ -1,7 +1,7 @@
 import {Directive, ViewContainerRef} from '@angular/core';
 
 @Directive({
-  selector: '[builderifyChildrenHost]'
+  selector: '[rxshaperChildrenHost]'
 })
 export class ChildrenHostDirective {
 

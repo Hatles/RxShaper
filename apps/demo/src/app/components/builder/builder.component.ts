@@ -102,7 +102,7 @@ export function builderFactory(builder: BuilderComponent): Builder {
 }
 
 @Component({
-  selector: 'builderify-builder',
+  selector: 'rxshaper-builder',
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss'],
   providers: [

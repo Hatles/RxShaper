@@ -12,12 +12,12 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
-import {BuilderifyService} from "../../services/builderify.service";
+import {BuilderifyService} from "../../services/rxshaper.service";
 import {DOCUMENT} from "@angular/common";
 import {BlockRendererService} from "./block-renderer.service";
 
 @Component({
-  selector: 'builderify-block-renderer',
+  selector: 'rxshaper-block-renderer',
   templateUrl: './block-renderer.component.html',
   styleUrls: ['./block-renderer.component.scss']
 })
