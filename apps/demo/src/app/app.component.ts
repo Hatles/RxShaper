@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ComponentRef, ElementRef, ViewChild} from '@angular/core';
 import {RxShaperService} from "./services/rxshaper.service";
 import {ComponentBlock} from "./components/builder/builder.component";
 // import components from "./data/components.json";
@@ -20,8 +20,10 @@ export class AppComponent {
   editor;
   components: ComponentBlock[];
 
+  @ViewChild("builder", {read: ElementRef, static: true})
+  builderRef: ElementRef;
 
-  constructor(service: RxShaperService) {
+  constructor() {
     this.components = components;
   }
 

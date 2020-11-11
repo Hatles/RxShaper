@@ -1,0 +1,25 @@
+<div class="wrapper-boundings-container" [class.hidden]="hideOverlay" #container>
+  <div class="wrapper-boundings-block wrapper-boundings-block-over" [class.hidden]="hideOver" #blockOver>
+    <div class="block-tooltip" *ngIf="over">{{over.blockRenderer.componentType.friendlyName || over.blockRenderer.componentType.name}}</div>
+  </div>
+  <div class="wrapper-boundings-block wrapper-boundings-block-selected" [class.hidden]="hideSelected" #blockSelected>
+    <div class="wrapper-boundings-helper wrapper-boundings-margin wrapper-boundings-margin-top" #marginTop>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-margin wrapper-boundings-margin-right" #marginRight>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-margin wrapper-boundings-margin-bottom" #marginBottom>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-margin wrapper-boundings-margin-left" #marginLeft>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-top" #paddingTop>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-right" #paddingRight>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-bottom" #paddingBottom>
+    </div>
+    <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-left" #paddingLeft>
+    </div>
+
+    <div class="block-actions" *ngIf="selected">{{selected.blockRenderer.componentType.friendlyName || selected.blockRenderer.componentType.name}}</div>
+  </div>
+</div>

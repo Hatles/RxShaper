@@ -57,29 +57,42 @@ export const components: ComponentBlock[] =
               },
             },
             {
-              "type": "text",
-              "options": {},
-              "children": [
-                {
-                  "type": "textnode",
-                }
-              ]
+              "type": "Text",
+              "options": {text: 'test text block'},
+
+            //   "children": [
+            //     {
+            //       "type": "textnode",
+            //     }
+            //   ]
             }
           ]
         },
         {
-          "type": "Block",
-          script: 'state.test = "script works"; console.log("executing script");',
-          bindings: {
-            test: 'returnValue(parent.state.onChange("test").pipe(rxjs.map(change => "listen parent: "+change.nextValue)))'
+          type: "Box",
+          style: {
+            large: {
+              'background-color': 'purple',
+              'padding': '30px',
+              'margin': '30px'
+            }
           },
-          actions: {
-            mousemove: 'state.test = event.name + " | screenX:" + event.value.screenX + " | screenY:" + event.value.screenY;'
-          },
-          "options": {
-            "test": "1.2",
-            "test2": "1.2"
-          }
+          children: [
+            {
+              "type": "Block",
+              script: 'state.test = "script works"; console.log("executing script");',
+              bindings: {
+                test: 'returnValue(parent.state.onChange("test").pipe(rxjs.map(change => "listen parent: "+change.nextValue)))'
+              },
+              actions: {
+                mousemove: 'state.test = event.name + " | screenX:" + event.value.screenX + " | screenY:" + event.value.screenY;'
+              },
+              "options": {
+                "test": "1.2",
+                "test2": "1.2"
+              }
+            }
+          ]
         }
       ]
     }

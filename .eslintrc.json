@@ -30,7 +30,7 @@
         ]
       }
     ],
-    "semi": "warn"
+    "semi": "error"
   },
   "overrides": [
     {

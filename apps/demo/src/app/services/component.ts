@@ -32,6 +32,10 @@ export interface ComponentType {
   outputs?: BlockOutput[];
   class?: any;
   type?: 'angular' | 'webcomponent' | 'react' | 'vue';
+  /**
+   * Any options, must be consumed by an extension to add specific behaviour
+   */
+  // options?: {[key: string]: any}
   defaultStyles?: { [key: string]: string };
   /**
    * Turn on if your component can accept children. Be sure to use in combination with
@@ -45,6 +49,7 @@ export interface ComponentType {
    * like here github.com/BuilderIO/builder/blob/master/packages/react/src/blocks/forms/Input.tsx#L34
    */
   noWrap?: boolean;
+  noBlock?: boolean;
   /**
    * Default children
    */
