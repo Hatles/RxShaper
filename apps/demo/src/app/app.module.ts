@@ -19,6 +19,7 @@ import {BoxBlock} from "./blocks/box.block";
 import {WrapperTestComponent} from "./components/wrapper-test/wrapper-test.component";
 import {TestWrapper} from "./services/test.wrapper";
 import { WrapperBlockBoundingsComponent } from './components/wrapper-block-boundings/wrapper-block-boundings.component';
+import { BlockResizerHelperDirective } from './directives/block-resizer-helper.directive';
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
@@ -35,7 +36,7 @@ export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
 
 
 @NgModule({
-  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective, WrapperBlockBoundingsComponent],
+  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,

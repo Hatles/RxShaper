@@ -1,5 +1,5 @@
 <div class="wrapper-boundings-container" [class.hidden]="hideOverlay" #container>
-  <div class="wrapper-boundings-block wrapper-boundings-block-over" [class.hidden]="hideOver" #blockOver>
+  <div class="wrapper-boundings-block wrapper-boundings-block-over" [class.hidden]="hideOver || dragging" #blockOver>
     <div class="block-tooltip" *ngIf="over">{{over.blockRenderer.componentType.friendlyName || over.blockRenderer.componentType.name}}</div>
   </div>
   <div class="wrapper-boundings-block wrapper-boundings-block-selected" [class.hidden]="hideSelected" #blockSelected>
@@ -18,6 +18,23 @@
     <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-bottom" #paddingBottom>
     </div>
     <div class="wrapper-boundings-helper wrapper-boundings-padding wrapper-boundings-padding-left" #paddingLeft>
+    </div>
+
+    <div class="wrapper-resizer-helper wrapper-resizer-margin wrapper-resizer-margin-top vertical" rxshaperBlockResizerHelper #resizerMarginTop="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-margin wrapper-resizer-margin-right horizontal" rxshaperBlockResizerHelper #resizerMarginRight="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-margin wrapper-resizer-margin-bottom vertical" rxshaperBlockResizerHelper #resizerMarginBottom="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-margin wrapper-resizer-margin-left horizontal" rxshaperBlockResizerHelper #resizerMarginLeft="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-padding wrapper-resizer-padding-top vertical" rxshaperBlockResizerHelper #resizerPaddingTop="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-padding wrapper-resizer-padding-right horizontal" rxshaperBlockResizerHelper #resizerPaddingRight="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-padding wrapper-resizer-padding-bottom vertical" rxshaperBlockResizerHelper #resizerPaddingBottom="resizer">
+    </div>
+    <div class="wrapper-resizer-helper wrapper-resizer-padding wrapper-resizer-padding-left horizontal" rxshaperBlockResizerHelper #resizerPaddingLeft="resizer">
     </div>
 
     <div class="block-actions" *ngIf="selected">{{selected.blockRenderer.componentType.friendlyName || selected.blockRenderer.componentType.name}}</div>

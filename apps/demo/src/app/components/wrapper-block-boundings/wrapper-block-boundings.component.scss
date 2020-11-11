@@ -60,36 +60,84 @@
       }
     }
 
-    .wrapper-boundings-margin {
-      background-color: rgba(100, 0, 0, 0.5);
+    .wrapper-boundings-helper {
 
-      &.wrapper-boundings-margin-top {
-        width: 100%;
+      &.wrapper-boundings-margin {
+        background-color: rgba(100, 0, 0, 0.5);
+
+        &.wrapper-boundings-margin-top {
+          width: 100%;
+        }
+        &.wrapper-boundings-margin-right {
+          height: 100%;
+        }
+        &.wrapper-boundings-margin-bottom {
+          width: 100%;
+        }
+        &.wrapper-boundings-margin-left {
+          height: 100%;
+        }
       }
-      &.wrapper-boundings-margin-right {
-        height: 100%;
-      }
-      &.wrapper-boundings-margin-bottom {
-        width: 100%;
-      }
-      &.wrapper-boundings-margin-left {
-        height: 100%;
+
+      &.wrapper-boundings-padding {
+        background-color: rgba(0, 100, 0, 0.5);
+        &.wrapper-boundings-padding-top {
+          width: 100%;
+        }
+        &.wrapper-boundings-padding-right {
+          height: 100%;
+        }
+        &.wrapper-boundings-padding-bottom {
+          width: 100%;
+        }
+        &.wrapper-boundings-padding-left {
+          height: 100%;
+        }
       }
     }
 
-    .wrapper-boundings-padding {
-      background-color: rgba(0, 100, 0, 0.5);
-      &.wrapper-boundings-padding-top {
-        width: 100%;
+    .wrapper-resizer-helper {
+      border-radius: 10px;
+      width: 6px;
+      height: 6px;
+      margin-top: -3px;
+      margin-left: -3px;
+
+      pointer-events: visible;
+      user-select: none;
+      position: absolute;
+
+      &.vertical {
+        cursor: s-resize;
       }
-      &.wrapper-boundings-padding-right {
-        height: 100%;
+      &.horizontal {
+        cursor: e-resize;
       }
-      &.wrapper-boundings-padding-bottom {
-        width: 100%;
+
+      &.wrapper-resizer-margin {
+        background-color: rgba(200, 0, 0, 0.8);
+
+        &.wrapper-resizer-margin-top {
+        }
+        &.wrapper-resizer-margin-right {
+        }
+        &.wrapper-resizer-margin-bottom {
+        }
+        &.wrapper-resizer-margin-left {
+        }
       }
-      &.wrapper-boundings-padding-left {
-        height: 100%;
+
+      &.wrapper-resizer-padding {
+        background-color: rgba(0, 200, 0, 0.8);
+
+        &.wrapper-resizer-padding-top {
+        }
+        &.wrapper-resizer-padding-right {
+        }
+        &.wrapper-resizer-padding-bottom {
+        }
+        &.wrapper-resizer-padding-left {
+        }
       }
     }
   }
