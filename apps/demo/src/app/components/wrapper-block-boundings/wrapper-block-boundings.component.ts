@@ -3,7 +3,7 @@ import {TestWrapper} from "../../services/test.wrapper";
 import {WrapperTestComponent} from "../wrapper-test/wrapper-test.component";
 import {fromEvent, Subject} from "rxjs";
 import {debounceTime, takeUntil, tap} from "rxjs/operators";
-import {BlockResizerHelperDirective} from "../../directives/block-resizer-helper.directive";
+import {BlockResizerHelperDirective, DragEvent} from "../../directives/block-resizer-helper.directive";
 
 @Component({
   selector: 'rxshaper-wrapper-block-boundings',
