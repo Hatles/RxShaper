@@ -73,6 +73,7 @@ export function buildComponentInput(options?: Trait) {
 }
 export function addComponentInput(component: Type<any>, options: BlockInput) {
   const current = RxShaperService.Components.find(item => item.class === component);
+  console.log('addComponentInput', component, options);
 
   if (current) {
     if (!current.inputs) {

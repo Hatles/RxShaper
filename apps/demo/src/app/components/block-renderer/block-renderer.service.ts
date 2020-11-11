@@ -13,8 +13,7 @@ import {_eval} from "../../utils/eval";
 import {filter, map, takeUntil, tap} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
 import {ComponentType} from "../../services/component";
-import {ComponentBuilder} from "../../decorators/block.decorator";
-import {BlockComponent} from "../block/block.component";
+import {RxShaperExtension, RxShaperExtensionFunction} from "../../extensions/extension";
 
 // Utils
 export function generateComponentId(prefix = 'rxshaper'): string {
@@ -49,6 +48,7 @@ export interface BlockScope<State extends object = object> {
   state: ComponentState<State>;
   element: any;
   parent?: BlockScope;
+  children: BlockScope[]
 }
 
 export interface BaseScope<State extends object = object> extends BlockScope<State> {
@@ -79,6 +79,8 @@ export interface StateChange<T = any> {
   previousValue: T;
   nextValue: T;
 }
+
+export type ExtensionProperties = {[key:string]: any}
 
 export interface ComponentState<State extends object = object> {
   onInit(): Promise<State>;
@@ -269,15 +271,16 @@ export class BlockRendererService {
   destroy: Subject<void> = new Subject<void>();
 
   component: ComponentBlock;
-
   componentType: ComponentType;
   componentRef: ComponentRef<any>;
   childrenView: EmbeddedViewRef<any>;
   childrenContainer: ViewContainerRef;
 
   childrenRenderers: BlockRendererService[] = [];
-  componentState: ComponentStateManager;
 
+  // custom properties for extensions
+  properties: ExtensionProperties = {};
+  componentState: ComponentStateManager;
   // scriptRunner: ScriptRunner = new VmScriptRunner();
   scriptRunner: ScriptRunner = new FunctionScriptRunner();
 
@@ -287,7 +290,7 @@ export class BlockRendererService {
    * @param injector
    * @param renderer
    * @param document
-   * @param builder
+   * @param shaper
    * @param parent
    */
   constructor(
@@ -296,7 +299,7 @@ export class BlockRendererService {
     private injector: Injector,
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document,
-    private builder: RxShaperService,
+    private shaper: RxShaperService,
     @Optional() @SkipSelf() private parent?: BlockRendererService
   ) {
     if (parent) {
@@ -306,13 +309,17 @@ export class BlockRendererService {
 
   onInit(component: ComponentBlock): void {
     this.component = component;
+    this.executeExtensions((e) => e.onInit);
     this.fixComponent();
+
+    this.executeExtensions((e) => e.beforeRender);
     this.render();
+    this.executeExtensions((e) => e.afterRender);
   }
 
   private render() {
     console.log('render', this.component);
-    const componentType = this.builder.getComponentType(this.component.type);
+    const componentType = this.shaper.getComponentType(this.component.type);
 
     if (!componentType) {
       return;
@@ -322,26 +329,43 @@ export class BlockRendererService {
     const componentFactory = this.resolver.resolveComponentFactory(componentType.class);
     const newInjector = this.createChildInjector(this.injector);
 
-    const componentRef = this.container.createComponent(componentFactory, null, newInjector);
+    // apply wrappers
+    const containerWithWrappers = this.shaper.config.wrappers
+      .reduce((c, w) => w.wrapper.wrap(c, this.shaper, this), this.container);
+
+    const componentRef = containerWithWrappers.createComponent(componentFactory, null, newInjector);
     this.componentRef = componentRef;
 
+    this.executeExtensions((e) => e.beforeCreateState);
     this.createState();
+    this.executeExtensions((e) => e.afterCreateState);
+
+    this.executeExtensions((e) => e.beforeStateBindings);
     this.mapOptions();
     this.mapBindings();
     this.mapActions();
     this.applyScript();
-    this.applyStyle();
+    this.executeExtensions((e) => e.afterCreateState);
 
+    this.executeExtensions((e) => e.beforeApplyStyle);
+    this.applyStyle();
+    this.executeExtensions((e) => e.afterApplyStyle);
+
+    this.executeExtensions((e) => e.beforeRenderChildren);
     this.renderChildren();
+    this.executeExtensions((e) => e.afterRenderChildren);
 
     this.handleChanges();
-    console.log(this);
   }
 
   private fixComponent() {
     if (!this.component.id) {
       this.component.id = generateComponentId();
     }
+  }
+
+  public executeExtensions<T = any>(fn: (extension: RxShaperExtension) => RxShaperExtensionFunction): T[] {
+    return this.shaper.extensions.map(e => fn(e.extension)(this.shaper, this, this.properties));
   }
 
   private createChildInjector(injector: Injector) {
@@ -363,13 +387,21 @@ export class BlockRendererService {
     }
   }
 
+  private blockScope: BlockScope;
+
   public getBlockScope(): BlockScope {
-    const parent = this.parent ? this.parent.getBlockScope() : undefined;
-    return {
-      element: this.componentRef.location.nativeElement,
-      state: this.componentState.asComponentState(),
-      parent: parent
-    };
+    if (!this.blockScope) {
+      const parent = this.parent ? this.parent.getBlockScope() : undefined;
+      // const children = this.childrenRenderers.map(child => child.getBlockScope());
+      const children = null; // todo
+      this.blockScope = {
+        element: this.componentRef.location.nativeElement,
+        state: this.componentState.asComponentState(),
+        parent: parent,
+        children: children
+      };
+    }
+    return this.blockScope;
   }
 
   public getBaseScope(): BaseScope {
@@ -546,9 +578,11 @@ export class BlockRendererService {
     // this.renderer.appendChild(head, style)
 
     // default style
-    this.renderer.setStyle(this.componentRef.location.nativeElement, 'display', 'block');
+    if (this.componentType.noBlock !== true) {
+      this.renderer.setStyle(this.componentRef.location.nativeElement, 'display', 'block');
+    }
 
-    // apply custom style, todo: rework with style tag and class
+    // apply custom style, todo: rework with style tag and class to support :hover...
     if (this.component.style) {
       // large
       Object.keys(this.component.style.large).forEach(cssKey => {
@@ -580,18 +614,17 @@ export class BlockRendererService {
         // todo children container layout
         // if (this.component.childrenContainerLayout)
         // {
-        //   console.log(this.childrenContainer.element.nativeElement.parent());
         //   this.renderer.setStyle(this.childrenContainer.element.nativeElement, 'display', 'flex');
         //   let flow: string;
         //   switch (this.component.childrenContainerLayout) {
         //     case "row":
-        //       flow = 'row nowrap'
+        //       flow = 'row nowrap';
         //       break;
         //     case "column":
-        //       flow = 'column nowrap'
+        //       flow = 'column nowrap';
         //       break;
         //     case "grid":
-        //       flow = 'row wrap'
+        //       flow = 'row wrap';
         //       break;
         //   }
         //   this.renderer.setStyle(this.childrenContainer.element.nativeElement, 'flex-flow', flow);
@@ -619,7 +652,7 @@ export class BlockRendererService {
   private createChildrenRenderer(child: ComponentBlock) {
     // const childView = this.childrenContainer.element;
     const childInjector = this.createChildInjector(this.componentRef.injector);
-    const renderer = new BlockRendererService(this.childrenContainer, this.resolver, childInjector, this.renderer, this.document, this.builder, this);
+    const renderer = new BlockRendererService(this.childrenContainer, this.resolver, childInjector, this.renderer, this.document, this.shaper, this);
     renderer.onInit(child);
   }
 
@@ -638,6 +671,8 @@ export class BlockRendererService {
     this.destroy.next();
     this.destroy.complete();
     this.componentRef.destroy();
+
+    this.executeExtensions((e) => e.onDestroy);
   }
 
   private registerChild(child: BlockRendererService) {

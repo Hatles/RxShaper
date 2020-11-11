@@ -17,12 +17,12 @@ export interface HasContainerRef {
   getContainerRef(): ViewContainerRef
 }
 
-@ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})
 @Component({
   selector: 'rxshaper-block',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss']
 })
+@ComponentBuilder({tag: 'block', name: 'Block', canHaveChildren: true})
 export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
 
   @ViewChild("container", {static: true})
@@ -43,7 +43,7 @@ export class BlockComponent implements OnInit, HasContainer, HasContainerRef {
   test: string;
 
   @Trait("test2input")
-  @Input()
+  // @Input()
   test2: string;
 
   @BuilderBlockOutput()

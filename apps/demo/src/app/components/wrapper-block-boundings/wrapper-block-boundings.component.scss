@@ -1,0 +1,96 @@
+:host {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.wrapper-boundings-container {
+  position: relative;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  &.hidden {
+    display: none;
+  }
+
+  .wrapper-boundings-block {
+    position: absolute;
+    border: 1px solid crimson;
+
+    &.hidden {
+      display: none;
+    }
+
+    .wrapper-boundings-helper {
+      position: absolute;
+      border: 1px solid crimson;
+    }
+
+    &.wrapper-boundings-block-over {
+      .block-tooltip {
+        background-color: crimson;
+        color: white;
+        padding: 5px;
+        height: 20px;
+        border-radius: 4px;
+        width: fit-content;
+        position: relative;
+        top: calc(100% + 10px);
+        left: 10px;
+      }
+    }
+
+    &.wrapper-boundings-block-selected {
+      .block-actions {
+        background-color: crimson;
+        color: white;
+        padding: 5px;
+        height: 20px;
+        border-radius: 4px;
+        width: fit-content;
+        position: absolute;
+        top: calc(100% + 10px);
+        left: 10px;
+      }
+    }
+
+    .wrapper-boundings-margin {
+      background-color: rgba(100, 0, 0, 0.5);
+
+      &.wrapper-boundings-margin-top {
+        width: 100%;
+      }
+      &.wrapper-boundings-margin-right {
+        height: 100%;
+      }
+      &.wrapper-boundings-margin-bottom {
+        width: 100%;
+      }
+      &.wrapper-boundings-margin-left {
+        height: 100%;
+      }
+    }
+
+    .wrapper-boundings-padding {
+      background-color: rgba(0, 100, 0, 0.5);
+      &.wrapper-boundings-padding-top {
+        width: 100%;
+      }
+      &.wrapper-boundings-padding-right {
+        height: 100%;
+      }
+      &.wrapper-boundings-padding-bottom {
+        width: 100%;
+      }
+      &.wrapper-boundings-padding-left {
+        height: 100%;
+      }
+    }
+  }
+}
