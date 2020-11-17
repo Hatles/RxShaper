@@ -1,5 +1,80 @@
-import {ComponentBlock} from "../components/builder/builder.component";
+import {ComponentBlock, ComponentBlockAnimationActions} from "../components/builder/builder.component";
 
+const testAnimations: ComponentBlockAnimationActions = {
+  'mousePos': {
+    timelines: {
+      x: [
+        {
+          key: 0,
+          effects: [
+            {
+              type: 'opacity',
+              target: 'self',
+              options: {
+                percent: 0.5
+              }
+            },
+            {
+              type: 'opacity',
+              target: 'parent',
+              options: {
+                percent: 0.5
+              }
+            },
+            {
+              type: 'move',
+              target: '#text1',
+              options: {
+                x: 0,
+                y: 0,
+              }
+            }
+          ]
+        },
+        {
+          key: 0.5,
+          effects: [
+            {
+              type: 'move',
+              target: '#text1',
+              options: {
+                x: '100px',
+                y: 0,
+              }
+            }
+          ]
+        },
+        {
+          key: 1,
+          effects: [
+            {
+              type: 'opacity',
+              target: 'self',
+              options: {
+                percent: 1
+              }
+            },
+            {
+              type: 'opacity',
+              target: 'parent',
+              options: {
+                percent: 1
+              }
+            },
+            {
+              type: 'move',
+              target: '#text1',
+              options: {
+                x: '200px',
+                y: '100px',
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+};
 export const components: ComponentBlock[] =
   [
     {
@@ -20,6 +95,7 @@ export const components: ComponentBlock[] =
         large: {
           "background-color": "red",
           "border": "3px solid black",
+          "perspective": '500px'
         }
       },
       class: ['test-class'],
@@ -31,6 +107,7 @@ export const components: ComponentBlock[] =
             "test": "1.1",
             "test2": "1.1"
           },
+          // animationActions: testAnimations,
           bindings: {
             test: 'returnValue(fetch("https://jsonplaceholder.typicode.com/todos/1").then(res => res.json()).then(json => JSON.stringify(json)));',
             // test: 'returnValue(fetch("https://jsonplaceholder.typicode.com/todos").then(res => res.json()));',
@@ -58,13 +135,18 @@ export const components: ComponentBlock[] =
             },
             {
               "type": "Text",
+              "id": "text1",
               "options": {text: 'test text block'},
-
-            //   "children": [
-            //     {
-            //       "type": "textnode",
-            //     }
-            //   ]
+              "style": {
+                large: {
+                  position: 'relative'
+                }
+              }
+              //   "children": [
+              //     {
+              //       "type": "textnode",
+              //     }
+              //   ]
             }
           ]
         },
@@ -72,10 +154,98 @@ export const components: ComponentBlock[] =
           type: "Box",
           style: {
             large: {
+              'position': 'relative',
               'background-color': 'purple',
               'padding': '30px',
-              'margin': '30px'
+              'margin': '30px',
+              'overflow': 'hidden'
             }
+          },
+          animationActions: {
+            'mousePos': {
+              timelines: {
+                x: [
+                  {
+                    key: 0,
+                    effects: [
+                      {
+                        type: 'move',
+                        target: '#shiny',
+                        options: {
+                          x: '100%'
+                        }
+                      },
+                      {
+                        type: 'rotate',
+                        target: 'self',
+                        options: {
+                          y: '-5deg'
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    key: 1,
+                    effects: [
+                      {
+                        type: 'move',
+                        target: '#shiny',
+                        options: {
+                          x: '0%'
+                        }
+                      },
+                      {
+                        type: 'rotate',
+                        target: 'self',
+                        options: {
+                          y: '5deg'
+                        }
+                      }
+                    ]
+                  }
+                ],
+                y: [
+                  {
+                    key: 0,
+                    effects: [
+                      {
+                        type: 'move',
+                        target: '#shiny',
+                        options: {
+                          y: '100%'
+                        }
+                      },
+                      {
+                        type: 'rotate',
+                        target: 'self',
+                        options: {
+                          x: '5deg'
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    key: 1,
+                    effects: [
+                      {
+                        type: 'move',
+                        target: '#shiny',
+                        options: {
+                          y: '0%'
+                        }
+                      },
+                      {
+                        type: 'rotate',
+                        target: 'self',
+                        options: {
+                          x: '-5deg'
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
           },
           children: [
             {
@@ -90,6 +260,23 @@ export const components: ComponentBlock[] =
               "options": {
                 "test": "1.2",
                 "test2": "1.2"
+              }
+            },
+            {
+              type: "Box",
+              id: "shiny",
+              style: {
+                large: {
+                  'background-color': 'white',
+                  'position': 'absolute',
+                  'width': '300px',
+                  'height': '300px',
+                  'margin-top': '-150px',
+                  'margin-left': '-150px',
+                  'border-radius': '150px',
+                  'opacity': 0.3,
+                  'filter': 'blur(1.5rem)'
+                }
               }
             }
           ]

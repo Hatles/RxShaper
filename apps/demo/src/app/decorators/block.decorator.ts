@@ -21,7 +21,6 @@ export function addComponent(component: AngularComponentType) {
   component = mergeComponentProperties(component);
 
   const current = RxShaperService.Components.find(item => item.name === component.name);
-  console.log("addComponent", component, current);
   if (current) {
     // // FIXME: why does sometimes we get an extra post without class - probably
     // // from postMessage handler wrong in some place
@@ -73,7 +72,6 @@ export function buildComponentInput(options?: Trait) {
 }
 export function addComponentInput(component: Type<any>, options: BlockInput) {
   const current = RxShaperService.Components.find(item => item.class === component);
-  console.log('addComponentInput', component, options);
 
   if (current) {
     if (!current.inputs) {

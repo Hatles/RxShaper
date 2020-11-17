@@ -20,6 +20,7 @@ import {WrapperTestComponent} from "./components/wrapper-test/wrapper-test.compo
 import {TestWrapper} from "./services/test.wrapper";
 import { WrapperBlockBoundingsComponent } from './components/wrapper-block-boundings/wrapper-block-boundings.component';
 import { BlockResizerHelperDirective } from './directives/block-resizer-helper.directive';
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
@@ -40,6 +41,7 @@ export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule, // required for animations
     RouterModule.forRoot([
       {
         path: '**',

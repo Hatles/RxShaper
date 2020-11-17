@@ -38,15 +38,17 @@ export class BlockRendererComponent implements OnInit, OnDestroy {
    * @param parent
    */
   constructor(
-    private container: ViewContainerRef,
-    private resolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document,
-    private builder: RxShaperService,
-    @Optional() @SkipSelf() private parent?: BlockRendererComponent
+    // private container: ViewContainerRef,
+    // private resolver: ComponentFactoryResolver,
+    // private injector: Injector,
+    // private renderer: Renderer2,
+    // @Inject(DOCUMENT) private document: Document,
+    // private builder: RxShaperService,
+    // @Optional() @SkipSelf() private parent?: BlockRendererDirective
+    service: BlockRendererService
   ) {
-    this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
+    // this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
+    this.service = service;
   }
 
   ngOnInit(): void {

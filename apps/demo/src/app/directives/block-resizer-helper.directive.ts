@@ -1,5 +1,5 @@
 import {Directive, ElementRef, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output} from '@angular/core';
-import {Observable, Subject} from "rxjs";
+import {animationFrameScheduler, Observable, Subject} from "rxjs";
 import {debounceTime, map, throttleTime} from "rxjs/operators";
 import {$e} from "codelyzer/angular/styles/chars";
 
@@ -26,12 +26,13 @@ export class BlockResizerHelperDirective implements OnInit, OnDestroy {
 
   @Input()
   throttleTime: number = 50;
+  @Input()
+  throttleFrame: boolean = true;
 
   private dragging: boolean = false;
   private startingPosition: DragEvent = null;
 
   constructor(public element: ElementRef) {
-    console.log(this.element.nativeElement);
   }
 
   @HostListener('mousedown', ['$event']) onMouseDown($event: MouseEvent){
@@ -56,7 +57,7 @@ export class BlockResizerHelperDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._drag.pipe(
-      throttleTime(this.throttleTime)
+      this.throttleFrame ? throttleTime(0, animationFrameScheduler) : throttleTime(this.throttleTime)
     )
       .subscribe(e => this.drag.emit(e))
     ;

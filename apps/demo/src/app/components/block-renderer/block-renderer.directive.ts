@@ -17,7 +17,8 @@ import {DOCUMENT} from "@angular/common";
 import {BlockRendererService} from "./block-renderer.service";
 
 @Directive({
-  selector: '[rxshaperBlockRenderer]'
+  selector: '[rxshaperBlockRenderer]',
+  providers: [BlockRendererService]
 })
 export class BlockRendererDirective implements OnInit, OnDestroy {
 
@@ -36,15 +37,17 @@ export class BlockRendererDirective implements OnInit, OnDestroy {
    * @param parent
    */
   constructor(
-    private container: ViewContainerRef,
-    private resolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private renderer: Renderer2,
-    @Inject(DOCUMENT) private document,
-    private builder: RxShaperService,
-    @Optional() @SkipSelf() private parent?: BlockRendererDirective
+    // private container: ViewContainerRef,
+    // private resolver: ComponentFactoryResolver,
+    // private injector: Injector,
+    // private renderer: Renderer2,
+    // @Inject(DOCUMENT) private document: Document,
+    // private builder: RxShaperService,
+    // @Optional() @SkipSelf() private parent?: BlockRendererDirective
+    service: BlockRendererService
   ) {
-    this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
+    // this.service = new BlockRendererService(container, resolver, injector, renderer, document, builder, parent ? parent.service : null);
+    this.service = service;
   }
 
   ngOnInit(): void {
@@ -52,6 +55,6 @@ export class BlockRendererDirective implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.service.onDestroy()
+    this.service.onDestroy();
   }
 }

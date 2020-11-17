@@ -7,6 +7,8 @@ https://rete.js.org/ : workflow code editor
 
 https://editorjs.io/ : js block page editor (single column, no nested block :( )
 
+https://github.com/google/blockly
+
 ------
 
 This project was generated using [Nx](https://nx.dev).

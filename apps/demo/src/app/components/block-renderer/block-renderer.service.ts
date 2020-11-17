@@ -1,19 +1,52 @@
 import {
   ComponentFactoryResolver,
   ComponentRef,
-  EmbeddedViewRef, Inject,
+  EmbeddedViewRef, Inject, Injectable,
   Injector, Optional, Renderer2, SkipSelf,
   ViewContainerRef
 } from '@angular/core';
-import {ComponentBlock} from "../builder/builder.component";
+import {
+  AnimationStyle,
+  ComponentBlock,
+  ComponentBlockAnimationAction,
+  ComponentBlockAnimationActionEffect,
+  ComponentBlockAnimationActionEffectType, ComponentBlockAnimationActionProperties,
+  ComponentBlockAnimationActions,
+  ComponentBlockAnimationActionType,
+  ComponentBlockAnimationTimelineActions,
+  ComponentBlockSelector,
+  NormalizedAnimation
+} from "../builder/builder.component";
 import {RxShaperService} from "../../services/rxshaper.service";
 import {DOCUMENT} from "@angular/common";
-import {fromEvent, Observable, ReplaySubject, Subject, Subscription} from "rxjs";
+import {
+  animationFrameScheduler,
+  combineLatest,
+  fromEvent,
+  Observable,
+  of,
+  ReplaySubject,
+  Subject,
+  Subscription
+} from "rxjs";
 import {_eval} from "../../utils/eval";
-import {filter, map, takeUntil, tap} from "rxjs/operators";
+import {filter, map, switchMap, takeUntil, tap, throttleTime} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
 import {ComponentType} from "../../services/component";
 import {RxShaperExtension, RxShaperExtensionFunction} from "../../extensions/extension";
+import {RendererService} from "../renderer/renderer.service";
+import {groupBy} from "../../utils/groupBy";
+import {sort} from "../../utils/sort";
+import {
+  animate,
+  AnimationBuilder,
+  AnimationMetadata,
+  AnimationStyleMetadata,
+  keyframes,
+  style
+} from "@angular/animations";
+
+import {anime, AnimeManager, timeline} from "../../utils/anime";
 
 // Utils
 export function generateComponentId(prefix = 'rxshaper'): string {
@@ -29,6 +62,7 @@ export class VmScriptRunner implements ScriptRunner {
     return _eval(script, 'script.ts', {...context, rxjs: rxjs}, false).default;
   }
 }
+
 export class FunctionScriptRunner implements ScriptRunner {
   run<T = any>(script: string, context: any, options) {
     context = {...context, rxjs: rxjs};
@@ -80,16 +114,23 @@ export interface StateChange<T = any> {
   nextValue: T;
 }
 
-export type ExtensionProperties = {[key:string]: any}
+export type ExtensionProperties = { [key: string]: any }
 
 export interface ComponentState<State extends object = object> {
   onInit(): Promise<State>;
+
   subscribeOnInit<T = any>(callBack: (state: State) => T): Promise<T>;
+
   onChanges(): Observable<StateChanges>;
+
   subscribeOnChanges<T = any>(callBack: (state: StateChanges) => T): Subscription;
+
   onChange(property: PropertyKey): Observable<StateChange>;
+
   subscribeOnChange<T = any>(property: PropertyKey, callBack: (state: StateChange) => T): Subscription;
+
   onDestroy(): Promise<void>;
+
   subscribeOnDestroy<T = any>(callBack: () => T): Promise<T>;
 }
 
@@ -133,15 +174,14 @@ export class ComponentStateHandler<State extends object = object> implements Pro
 
   private initLifecycle() {
     this._init = this.componentState.stateInit.toPromise();
-    this._changes = this.componentState.stateChanges.pipe(tap(r => {
-      console.log('bbbbb', r);
-    }));
+    this._changes = this.componentState.stateChanges;
     this._destroy = this.componentState.stateDestroy.toPromise();
   }
 
   onInit(): Promise<State> {
     return this._init;
   }
+
   subscribeOnInit<T = any>(callBack: (state: State) => T): Promise<T> {
     return this.onInit().then(callBack);
   }
@@ -149,12 +189,15 @@ export class ComponentStateHandler<State extends object = object> implements Pro
   onChanges(): Observable<StateChanges> {
     return this._changes;
   }
+
   subscribeOnChanges<T = any>(callBack: (state: StateChanges) => T): Subscription {
     return this.onChanges().subscribe(changes => callBack(changes));
   }
+
   onChange(property: PropertyKey): Observable<StateChange> {
     return this.componentState.getStateChange(property);
   }
+
   subscribeOnChange<T = any>(property: PropertyKey, callBack: (state: StateChange) => T): Subscription {
     return this.onChange(property).subscribe(change => callBack(change));
   }
@@ -162,13 +205,16 @@ export class ComponentStateHandler<State extends object = object> implements Pro
   onDestroy(): Promise<void> {
     return this._destroy;
   }
+
   subscribeOnDestroy<T = any>(callBack: () => T): Promise<T> {
     return this.onDestroy().then(callBack);
   }
 }
 
 export class ComponentStateManager<State extends object = object> {
-  get componentState(): State {return this.componentRef.instance;} // todo: filter with state allowed properties
+  get componentState(): State {
+    return this.componentRef.instance;
+  } // todo: filter with state allowed properties
 
   private _stateValue: State;
   private _state: ReplaySubject<State> = new ReplaySubject<State>();
@@ -219,8 +265,7 @@ export class ComponentStateManager<State extends object = object> {
       this._stateValue = initState;
       this._state.next(initState);
       this._stateInit.next(initState);
-    }
-    else {
+    } else {
       const nextState = {...this._stateValue, ...state};
       this._stateValue = nextState;
       this._state.next(nextState);
@@ -257,6 +302,7 @@ export class ComponentStateManager<State extends object = object> {
     this._stateInit.complete();
     this._stateInit.unsubscribe();
   }
+
   onDestroy() {
     this._stateChanges.complete();
     this._stateChanges.unsubscribe();
@@ -267,6 +313,7 @@ export class ComponentStateManager<State extends object = object> {
   }
 }
 
+@Injectable()
 export class BlockRendererService {
   destroy: Subject<void> = new Subject<void>();
 
@@ -291,6 +338,7 @@ export class BlockRendererService {
    * @param renderer
    * @param document
    * @param shaper
+   * @param shaperManager
    * @param parent
    */
   constructor(
@@ -300,12 +348,16 @@ export class BlockRendererService {
     private renderer: Renderer2,
     @Inject(DOCUMENT) private document: Document,
     private shaper: RxShaperService,
-    @Optional() @SkipSelf() private parent?: BlockRendererService
+    private shaperManager: RendererService,
+    @Optional() @SkipSelf() private parent?: BlockRendererService,
   ) {
     if (parent) {
       parent.registerChild(this);
     }
+
+    this.animationBuilder = this.injector.get(AnimationBuilder);
   }
+  private animationBuilder: AnimationBuilder;
 
   onInit(component: ComponentBlock): void {
     this.component = component;
@@ -315,10 +367,11 @@ export class BlockRendererService {
     this.executeExtensions((e) => e.beforeRender);
     this.render();
     this.executeExtensions((e) => e.afterRender);
+
+    this.shaperManager.register(this.component.id ,this);
   }
 
   private render() {
-    console.log('render', this.component);
     const componentType = this.shaper.getComponentType(this.component.type);
 
     if (!componentType) {
@@ -344,6 +397,7 @@ export class BlockRendererService {
     this.mapOptions();
     this.mapBindings();
     this.mapActions();
+    this.mapAnimationActions();
     this.applyScript();
     this.executeExtensions((e) => e.afterCreateState);
 
@@ -369,7 +423,21 @@ export class BlockRendererService {
   }
 
   private createChildInjector(injector: Injector) {
-    return Injector.create({providers: [], parent: injector});
+    return Injector.create({
+      providers: [
+        {
+          provide: BlockRendererService, useFactory: blockRendererFactory(this), deps: [
+            ComponentFactoryResolver,
+            Injector,
+            Renderer2,
+            DOCUMENT,
+            RxShaperService,
+            RendererService
+          ]
+        },
+        // BlockRendererService,
+      ], parent: injector
+    });
   }
 
   private createState() {
@@ -447,12 +515,11 @@ export class BlockRendererService {
 
       // apply async script
       if (scriptResult) {
-        if(scriptResult instanceof Observable) {
+        if (scriptResult instanceof Observable) {
           scriptResult.subscribe(result => {
             // todo: do something
           });
-        }
-        else {
+        } else {
           Promise.resolve(scriptResult).then(result => {
             // todo: do something
           });
@@ -479,8 +546,7 @@ export class BlockRendererService {
             if (bindingResult) {
               if (bindingResult instanceof Observable) {
                 bindingResult.pipe(takeUntil(this.destroy)).subscribe(result => this.componentState.set(input.name, result));
-              }
-              else {
+              } else {
                 Promise.resolve(bindingResult).then(result => this.componentState.set(input.name, result));
               }
             }
@@ -503,19 +569,15 @@ export class BlockRendererService {
               let event: Observable<any>;
 
               if (actionName === 'state.init') { // component any state changes evennt
+                event = this.componentState.stateInit;
+              } else if (actionName === 'state.changes') { // component any state changes evennt
                 event = this.componentState.stateChanges;
-              }
-              else if (actionName === 'state.changes') { // component any state changes evennt
-                event = this.componentState.stateChanges;
-              }
-              else if (actionName === 'state.destroy') { // component any state changes evennt
-                event = this.componentState.stateChanges;
-              }
-              else if (actionName.startsWith('state.change.') && actionName.split('.').length === 3) { // component one state change
+              } else if (actionName === 'state.destroy') { // component any state changes evennt
+                event = this.componentState.stateDestroy;
+              } else if (actionName.startsWith('state.change.') && actionName.split('.').length === 3) { // component one state change
                 const property = actionName.split('.')[2];
                 event = this.componentState.getStateChange(property);
-              }
-              else {
+              } else {
                 const componentOutput = this.componentType.outputs ? this.componentType.outputs.find(o => o.name === actionName) : null;
 
                 if (componentOutput) { // angular native output
@@ -551,6 +613,470 @@ export class BlockRendererService {
         // todo: do something
       });
     }
+  }
+
+  private mapAnimationActions() {
+    if (this.component.animationActions) {
+      // const instance = this.componentRef.instance;
+      Object.keys(this.component.animationActions).forEach(eventTypeName => {
+        const animations = this.component.animationActions[eventTypeName];
+
+        const normalizedAnimations: NormalizedAnimation[] = this.normalizeAnimations(animations);
+
+        const event: Observable<any> = this.buildAnimationEvent(eventTypeName, this.componentRef.location.nativeElement);
+
+        if (normalizedAnimations && event) {
+          this.buildComponentAnimation(normalizedAnimations, event);
+        }
+      });
+    }
+  }
+
+  private _eventTypes: ComponentBlockAnimationActionType[] = [
+    {
+      name: 'mousePos',
+      progressive: true,
+      timelines: {
+        x: {
+          min: 0,
+          max: 1
+        },
+        y: {
+          min: 0,
+          max: 1
+        }
+      },
+      build: el => fromEvent(el, 'mousemove')
+          .pipe(
+            map((e: MouseEvent) => {
+              const rect = el.getBoundingClientRect();
+              const x = (e.clientX - rect.left) / rect.width; // x position within the element.
+              const y = (e.clientY - rect.top) / rect.height;  // y position within the element.
+              return {x: x, y: y};
+            }),
+            filter(v => v.x >= 0 && v.x <= 1 && v.y >= 0 && v.y <= 1), // filter events out of element
+            // throttleTime(1000/60) // 60 fps
+            throttleTime(0, animationFrameScheduler) // sync with frames
+          )
+    }
+  ];
+
+  private buildAnimationEvent(eventTypeName: string, el: HTMLElement): Observable<any> {
+    const eventType = this._eventTypes.find(e => e.name === eventTypeName);
+
+    if (eventType) {
+      return eventType.build(el);
+    }
+
+    return null;
+  }
+
+  private normalizeAnimations(dirtyAnims: ComponentBlockAnimationActionProperties): NormalizedAnimation[] {
+    // group animations and oder byr keyframe
+    const allKeyFrames: {property: string, keyframe: number, effect: ComponentBlockAnimationActionEffect}[] = Object
+      .keys(dirtyAnims.timelines)
+      .reduce((acc, property) => ([
+        ...acc,
+        ...dirtyAnims.timelines[property]
+          .reduce((acc, t) => ([...acc, ...t.effects
+            .reduce((acc, e) => ([
+              ...acc,
+              ({property: property, keyframe: t.key, effect: e})
+            ]), [])
+              ]), []
+          )]),
+        []);
+    // const timelines = Object.keys(dirtyAnims.timelines).map(key => ({property: key, timelines: dirtyAnims.timelines[key]})).reduce((acc, t) => ([...acc, t]), [] as {property: string, timelines: ComponentBlockAnimationTimelineActions}[]);
+    // const allKeyFrames = timelines.reduce((acc, a) => ([...acc, ...a.timelines.effects.map(e => ({key: a.key, effect: e}))]), [] as {key: number, effect: ComponentBlockAnimationActionEffect}[]);
+    const animations = groupBy(allKeyFrames, a => a.effect.type);
+    const normalizedAnimations: NormalizedAnimation[] = [];
+    animations.forEach((as, asType) => {
+      const keyFramesGroupByTarget = groupBy(as, a => a.effect.target);
+      const finalTargetsEffects: {
+        target: string,
+        properties: {
+          property: string,
+          effects: {
+            keyframe: number,
+            property: string,
+            effect: ComponentBlockAnimationActionEffect
+          }[]
+        }[]
+      }[] = [];
+      keyFramesGroupByTarget.forEach((effects, target) => {
+        const keyframesGroupByProperty = groupBy(effects, e => e.property);
+        const properties: {
+          property: string,
+          effects: {
+            keyframe: number,
+            property: string,
+            effect: ComponentBlockAnimationActionEffect
+          }[]
+        }[] = [];
+        keyframesGroupByProperty.forEach((kf, prop) => {
+          const orderedKeys = sort(kf, e => e.keyframe);
+          properties.push({property: prop, effects: orderedKeys});
+        });
+        finalTargetsEffects.push({target: target, properties: properties});
+      });
+      const effectType = this.getEffectType(asType);
+
+      normalizedAnimations.push({effectTypeName: asType, effectType: effectType, targets: finalTargetsEffects});
+    });
+
+    return normalizedAnimations;
+  }
+
+  // todo: replace with collection of default effects and component type effects
+  private _effectTypes: ComponentBlockAnimationActionEffectType[] = [
+    {
+      name: 'opacity',
+      progressive: true,
+      handler: (prevEffect, nextEffect, target, progress) => {
+        const startOpacity: number = prevEffect.options.percent;
+        const endOpacity: number = nextEffect.options.percent;
+        const frameOpacity = startOpacity + (endOpacity - startOpacity) * progress;
+        // this.renderer.setStyle(target, 'opacity', frameOpacity);
+        const animation: AnimationMetadata | AnimationMetadata[] = [style({'opacity': frameOpacity})];
+        this.playAnimation(animation, target);
+      },
+      buildAnimationFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        return {'opacity': effect.options.percent};
+      },
+      buildAnimeFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        return {'opacity': effect.options.percent};
+      }
+    },
+    {
+      name: 'move',
+      progressive: true,
+      handler: (prevEffect, nextEffect, target, progress) => {
+        const startX: number = prevEffect.options.x;
+        const startY: number = prevEffect.options.y;
+        const endX: number = nextEffect.options.x;
+        const endY: number = nextEffect.options.y;
+        const frameX = startX + (endX - startX) * progress;
+        const frameY = startY + (endY - startY) * progress;
+        // this.renderer.setStyle(target, 'top', frameX);
+        // this.renderer.setStyle(target, 'left', frameY);
+        const animation: AnimationMetadata | AnimationMetadata[] = [style({'position': 'relative', 'top': frameY + 'px', left: frameX + 'px'})];
+        this.playAnimation(animation, target);
+      },
+      buildAnimationFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        const styles: AnimationStyle = {};
+        if(effect.options.y) {
+          styles.top = effect.options.y;
+        }
+        if(effect.options.x) {
+          styles.left = effect.options.x;
+        }
+        return styles;
+      },
+      buildAnimeFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        const styles: AnimationStyle = {};
+        if(effect.options.y) {
+          styles.top = effect.options.y;
+        }
+        if(effect.options.x) {
+          styles.left = effect.options.x;
+        }
+        return styles;
+      }
+    },
+    {
+      name: 'rotate',
+      progressive: true,
+      handler: (prevEffect, nextEffect, target, progress) => {
+
+      },
+      buildAnimationFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        const styles: AnimationStyle = {composite: 'add'};
+        styles.transform = '';
+        if(effect.options.y) {
+          styles.transform = styles.transform + ' rotateY('+effect.options.y+')';
+        }
+        if(effect.options.x) {
+          styles.transform = styles.transform + ' rotateX('+effect.options.x+')';
+        }
+        if(effect.options.z) {
+          styles.transform = styles.transform + ' rotateZ('+effect.options.z+')';
+        }
+        return styles;
+      },
+      buildAnimeFrame: (effect: ComponentBlockAnimationActionEffect) => {
+        const styles: AnimationStyle = {};
+        if(effect.options.y) {
+          styles.rotateY = effect.options.y;
+        }
+        if(effect.options.x) {
+          styles.rotateX = effect.options.x;
+        }
+        if(effect.options.z) {
+          styles.rotateZ = effect.options.z;
+        }
+        return styles;
+      }
+    }
+  ];
+
+  private playAnimation(animation: AnimationMetadata | AnimationMetadata[], element: any) {
+    const factory = this.animationBuilder.build(animation);
+    const player = factory.create(element, {});
+    player.play();
+  }
+
+  private getEffectType(name: string): ComponentBlockAnimationActionEffectType {
+    return this._effectTypes.find(e => e.name === name);
+  }
+
+  private runComponentAnimation(
+    actionName: string, animation: ComponentBlockAnimationAction[], eventValue: number, handler: ComponentBlockAnimationActionType,
+    animations: {effectTypeName: string, effectType: ComponentBlockAnimationActionEffectType, targets: {target: string, effects: {key: number, effect: ComponentBlockAnimationActionEffect}[]}[]}[]
+  ) {
+    animations.forEach(a => {
+      a.targets.forEach(at => {
+        const targetBlock = this.getAnimationTarget(at.target);
+
+        if (targetBlock) {
+          const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
+          let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+          let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+          if (nextKeyIndex > -1) {
+            prevEffect = at.effects[nextKeyIndex - 1];
+            nextEffect = at.effects[nextKeyIndex];
+          }
+          else {
+            prevEffect = null;
+            nextEffect = null;
+          }
+
+          const keyLength = nextEffect.key - prevEffect.key;
+          const relativeValue = eventValue - prevEffect.key;
+          const progress = relativeValue / keyLength;
+          a.effectType.handler(prevEffect.effect, nextEffect.effect, targetBlock.componentRef.location.nativeElement, progress);
+        }
+      });
+    });
+  }
+
+  private buildComponentAnimation(
+    animations: NormalizedAnimation[], event: Observable<number>
+  ) {
+    // timed animations
+    // animations.forEach(a => {
+    //   a.targets.forEach(at => {
+    //     const anim: AnimationMetadata[] = a.effectType.buildAnimation(at.effects);
+    //     const factory = this.animationBuilder.build(anim);
+    //
+    //     const targetBlock = this.animationTargetChanges(at.target);
+    //
+    //     combineLatest([
+    //       targetBlock.pipe(
+    //         filter(t => !!t),
+    //         map(target => {
+    //           const player = factory.create(target.componentRef.location.nativeElement);
+    //           player.play();
+    //           player.pause();
+    //           return player;
+    //         })
+    //       ),
+    //       event
+    //     ]).pipe(takeUntil(this.destroy))
+    //       .subscribe(([targetPlayer, eventValue]) => {
+    //         // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
+    //         // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+    //         // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+    //         // if (nextKeyIndex > -1) {
+    //         //   prevEffect = at.effects[nextKeyIndex - 1];
+    //         //   nextEffect = at.effects[nextKeyIndex];
+    //         // }
+    //         // else {
+    //         //   prevEffect = null;
+    //         //   nextEffect = null;
+    //         // }
+    //         //
+    //         // const keyLength = nextEffect.key - prevEffect.key;
+    //         // const relativeValue = eventValue - prevEffect.key;
+    //         // const progress = relativeValue / keyLength;
+    //         //
+    //         // targetPlayer.setPosition(progress);
+    //         targetPlayer.setPosition(eventValue);
+    //       }
+    //     );
+    //   });
+    // });
+
+    animations.forEach(a => {
+      a.targets.forEach(at => {
+        // const anim: AnimationMetadata[] = a.effectType.buildAnimation(at.effects);
+        // const factory = this.animationBuilder.build(anim);
+
+        const targetBlock = this.animationTargetChanges(at.target);
+
+        combineLatest([
+          targetBlock.pipe(
+            filter(t => !!t),
+            map(targetBlock => {
+              // const player = factory.create(target.componentRef.location.nativeElement);
+              // player.play();
+              // player.pause();
+              // return player;
+              const target = targetBlock.componentRef.location.nativeElement;
+              const allAnims = at.properties.map(property => {
+                let prevKeyframe: number = 0;
+                const frames = property.effects.map(e => {
+                  const duration = e.keyframe - prevKeyframe;
+                  prevKeyframe = e.keyframe;
+                  return ({...a.effectType.buildAnimeFrame(e.effect), duration: duration});
+                });
+                return {property: property.property, frames: frames};
+              });
+
+              //
+              //
+              // const tl = anime.timeline({
+              //   targets: target,
+              //   delay: function(el, i) { return i * 200; },
+              //   duration: 500, // Can be inherited
+              //   easing: 'linear', // Can be inherited
+              //   // direction: 'alternate', // Is not inherited
+              //   translateX: 500,
+              //   loop: true // Is not inherited
+              // });
+              //
+              // tl
+              //   .add({
+              //     translateY: 250,
+              //     // override the easing parameter
+              //     // easing: 'spring',
+              //   }, 0)
+              //   // .add({
+              //   //   // opacity: .5,
+              //   //   // scale: 2
+              //   // }, 0)
+              //   // .add({
+              //   //   // override the targets parameter
+              //   //   // rotate: 180
+              //   // }, 0)
+              //   // .add({
+              //   //   // translateX: 0,
+              //   //   // scale: 1
+              //   // }, 0)
+              // ;
+
+              // const parent = timeline({targets: target});
+              return allAnims.map(anim => {
+                // const builtAnim = (parent as any).add({
+                const builtAnim = anime({
+                  autoplay: false,
+                  targets: target,
+                  keyframes: anim.frames,
+                  duration: 1,
+                  easing: 'linear'
+                // }, 0, true);
+                });
+                return {property: anim.property, player: builtAnim};
+              });
+
+              // const a = anime({
+              //   targets: target,
+              //   keyframes: [
+              //     {translateY: -40},
+              //     {translateX: 250},
+              //     {translateY: 40},
+              //     {translateX: 0},
+              //     {translateY: 0}
+              //   ],
+              //   duration: 4000,
+              //   easing: 'easeOutElastic(1, .8)',
+              //   loop: true
+              // });
+
+            })
+          ),
+          event
+        ]).pipe(takeUntil(this.destroy))
+          .subscribe(([player, eventValue]) => {
+            // const allAnims = at.properties.map(property => {
+            //   const frames = property.effects.map(e => ({...a.effectType.buildAnimationFrame(e.effect), offset: e.keyframe}));
+            //   // const framesGroupByKeyframe = groupBy(frames, f => f.keyframe);
+            //   const anim: AnimationStyleMetadata[] = frames.map(f => style(f));
+            //   return {property: property.property, animation: anim};
+            // });
+            // allAnims.forEach(anim => {
+            //   const builtAnim = animate('1s', keyframes(anim.animation));
+            //   const factory = this.animationBuilder.build([builtAnim]);
+            //   const player = factory.create(target);
+            //   player.play();
+            //   player.pause();
+            //   player.setPosition(eventValue[anim.property]);
+            // });
+
+            player.forEach(p => {
+              p.player.seek(eventValue[p.property]);
+            });
+
+            // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
+            // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+            // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+            // if (nextKeyIndex > -1) {
+            //   prevEffect = at.effects[nextKeyIndex - 1];
+            //   nextEffect = at.effects[nextKeyIndex];
+            // }
+            // else {
+            //   prevEffect = null;
+            //   nextEffect = null;
+            // }
+            //
+            // const keyLength = nextEffect.key - prevEffect.key;
+            // const relativeValue = eventValue - prevEffect.key;
+            // const progress = relativeValue / keyLength;
+            //
+            // targetPlayer.setPosition(progress);
+          }
+        );
+      });
+    });
+  }
+
+  private getAnimationTarget(target: ComponentBlockSelector): BlockRendererService {
+    switch (target) {
+      case "children":
+        return null;
+        break;
+      case "parent":
+        return this.parent;
+        break;
+      case 'self':
+        return this;
+    }
+
+    if (target.startsWith('#')) {
+      const id = target.substring(1);
+      return this.shaperManager.getBlock(id);
+    }
+
+    return null;
+  }
+
+  private animationTargetChanges(target: ComponentBlockSelector): Observable<BlockRendererService> {
+    switch (target) {
+      case "children":
+        return of(null);
+        break;
+      case "parent":
+        return of(this.parent);
+        break;
+      case 'self':
+        return of(this);
+    }
+
+    if (target.startsWith('#')) {
+      const id = target.substring(1);
+      return this.shaperManager.blocksChanges(id);
+    }
+
+    return of(null);
   }
 
   private applyStyle() {
@@ -652,8 +1178,9 @@ export class BlockRendererService {
   private createChildrenRenderer(child: ComponentBlock) {
     // const childView = this.childrenContainer.element;
     const childInjector = this.createChildInjector(this.componentRef.injector);
-    const renderer = new BlockRendererService(this.childrenContainer, this.resolver, childInjector, this.renderer, this.document, this.shaper, this);
-    renderer.onInit(child);
+    const childRenderer = childInjector.get(BlockRendererService);
+    // const childRenderer = new BlockRendererService(this.childrenContainer, this.resolver, childInjector, this.renderer, this.document, this.shaper, this.shaperManager, this);
+    childRenderer.onInit(child);
   }
 
   private hasChildren(): boolean {
@@ -666,6 +1193,7 @@ export class BlockRendererService {
 
   onDestroy(): void {
     this.childrenRenderers.forEach(c => c.onDestroy());
+    this.shaperManager.unregister(this.component.id);
 
     this.componentState.onDestroy();
     this.destroy.next();
@@ -678,4 +1206,28 @@ export class BlockRendererService {
   private registerChild(child: BlockRendererService) {
     this.childrenRenderers.push(child);
   }
+}
+
+export function blockRendererFactory(
+  parent: BlockRendererService
+): (
+  // container: ViewContainerRef,
+  resolver: ComponentFactoryResolver,
+  injector: Injector,
+  renderer: Renderer2,
+  document: Document,
+  builder: RxShaperService,
+  manager: RendererService) => BlockRendererService {
+  return (
+    // container: ViewContainerRef,
+    resolver: ComponentFactoryResolver,
+    injector: Injector,
+    renderer: Renderer2,
+    document: Document,
+    shaper: RxShaperService,
+    manager: RendererService
+  ) => {
+    return new BlockRendererService(parent.childrenContainer, resolver, injector, renderer, document, shaper, manager, parent);
+    // return new BlockRendererService(container, resolver, injector, renderer, document, builder, manager, parent);
+  };
 }

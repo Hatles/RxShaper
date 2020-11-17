@@ -1,10 +1,14 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {ComponentBlock} from "../builder/builder.component";
+import {RendererService} from "./renderer.service";
 
 @Component({
   selector: '[rxshaper-renderer]',
   templateUrl: './renderer.component.html',
-  styleUrls: ['./renderer.component.scss']
+  styleUrls: ['./renderer.component.scss'],
+  providers: [
+    RendererService
+  ]
 })
 export class RendererComponent implements OnInit {
 
@@ -14,6 +18,7 @@ export class RendererComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
+
   }
 
 }
