@@ -30,7 +30,7 @@ import {
   Subscription
 } from "rxjs";
 import {_eval} from "../../utils/eval";
-import {filter, map, switchMap, takeUntil, tap, throttleTime} from "rxjs/operators";
+import {distinctUntilChanged, filter, map, switchMap, takeUntil, tap, throttleTime} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
 import {ComponentType} from "../../services/component";
 import {RxShaperExtension, RxShaperExtensionFunction} from "../../extensions/extension";
@@ -47,6 +47,7 @@ import {
 } from "@angular/animations";
 
 import {anime, AnimeManager, timeline} from "../../utils/anime";
+import {fromIntersectionObserver, IntersectionStatus} from "../../utils/fromIntersectionObserver";
 
 // Utils
 export function generateComponentId(prefix = 'rxshaper'): string {
@@ -357,6 +358,7 @@ export class BlockRendererService {
 
     this.animationBuilder = this.injector.get(AnimationBuilder);
   }
+
   private animationBuilder: AnimationBuilder;
 
   onInit(component: ComponentBlock): void {
@@ -368,7 +370,7 @@ export class BlockRendererService {
     this.render();
     this.executeExtensions((e) => e.afterRender);
 
-    this.shaperManager.register(this.component.id ,this);
+    this.shaperManager.register(this.component.id, this);
   }
 
   private render() {
@@ -623,10 +625,10 @@ export class BlockRendererService {
 
         const normalizedAnimations: NormalizedAnimation[] = this.normalizeAnimations(animations);
 
-        const event: Observable<any> = this.buildAnimationEvent(eventTypeName, this.componentRef.location.nativeElement);
+        const {event, actionType} = this.buildAnimationEvent(eventTypeName, animations, this.componentRef.location.nativeElement);
 
         if (normalizedAnimations && event) {
-          this.buildComponentAnimation(normalizedAnimations, event);
+          this.buildComponentAnimation(normalizedAnimations, event, actionType);
         }
       });
     }
@@ -647,25 +649,55 @@ export class BlockRendererService {
         }
       },
       build: el => fromEvent(el, 'mousemove')
+        .pipe(
+          // throttleTime(1000/60), // 60 fps
+          throttleTime(0, animationFrameScheduler), // sync with frames
+
+          map((e: MouseEvent) => {
+            const rect = el.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width; // x position within the element.
+            const y = (e.clientY - rect.top) / rect.height;  // y position within the element.
+            return {x: x, y: y};
+          }),
+          filter(v => v.x >= 0 && v.x <= 1 && v.y >= 0 && v.y <= 1), // filter events out of element
+        )
+    },
+    {
+      name: 'mouseenter',
+      progressive: false,
+      build: (el) => fromEvent(el, 'mouseenter')
+    },
+    {
+      name: 'mouseleave',
+      progressive: false,
+      build: (el) => fromEvent(el, 'mouseleave')
+    },
+    {
+      name: 'enterviewport',
+      progressive: false,
+      // params: [name: , type: , options: , defaultValue: ] // params for visual form (formly)
+      build: (el, options,  manager) => {
+        const config: IntersectionObserverInit = {
+          root: manager.viewport,
+          rootMargin: `${options.marginTop || '0px'} ${options.marginRight || '0px'} ${options.marginBottom || '0px'} ${options.marginLeft || '0px'}`,
+          threshold: options.threshold || 0
+        };
+        return fromIntersectionObserver(el, config)
           .pipe(
-            map((e: MouseEvent) => {
-              const rect = el.getBoundingClientRect();
-              const x = (e.clientX - rect.left) / rect.width; // x position within the element.
-              const y = (e.clientY - rect.top) / rect.height;  // y position within the element.
-              return {x: x, y: y};
-            }),
-            filter(v => v.x >= 0 && v.x <= 1 && v.y >= 0 && v.y <= 1), // filter events out of element
-            // throttleTime(1000/60) // 60 fps
-            throttleTime(0, animationFrameScheduler) // sync with frames
+            tap(console.log),
+            distinctUntilChanged(),
+            filter(v => v === IntersectionStatus.Visible)
           )
+          ;
+      }
     }
   ];
 
-  private buildAnimationEvent(eventTypeName: string, el: HTMLElement): Observable<any> {
+  private buildAnimationEvent(eventTypeName: string, animations: ComponentBlockAnimationActionProperties, el: HTMLElement): { event: Observable<any>; actionType: ComponentBlockAnimationActionType } {
     const eventType = this._eventTypes.find(e => e.name === eventTypeName);
 
     if (eventType) {
-      return eventType.build(el);
+      return {event: eventType.build(el, animations.options, this.shaperManager, this.shaper), actionType: eventType};
     }
 
     return null;
@@ -673,19 +705,35 @@ export class BlockRendererService {
 
   private normalizeAnimations(dirtyAnims: ComponentBlockAnimationActionProperties): NormalizedAnimation[] {
     // group animations and oder byr keyframe
-    const allKeyFrames: {property: string, keyframe: number, effect: ComponentBlockAnimationActionEffect}[] = Object
-      .keys(dirtyAnims.timelines)
-      .reduce((acc, property) => ([
-        ...acc,
-        ...dirtyAnims.timelines[property]
-          .reduce((acc, t) => ([...acc, ...t.effects
-            .reduce((acc, e) => ([
-              ...acc,
-              ({property: property, keyframe: t.key, effect: e})
-            ]), [])
-              ]), []
-          )]),
-        []);
+    const allKeyFrames: { property: string, keyframe: number, effect: ComponentBlockAnimationActionEffect }[] = [];
+    if (dirtyAnims.timelines) {
+      const allKeyFramesTimelines: { property: string, keyframe: number, effect: ComponentBlockAnimationActionEffect }[] = Object
+        .keys(dirtyAnims.timelines)
+        .reduce((acc, property) => ([
+            ...acc,
+            ...dirtyAnims.timelines[property]
+              .reduce((acc, t) => ([...acc, ...t.effects
+                  .reduce((acc, e) => ([
+                    ...acc,
+                    ({property: property, keyframe: t.key, effect: e})
+                  ]), [])
+                ]), []
+              )]),
+          []);
+      allKeyFrames.push(...allKeyFramesTimelines);
+    }
+    if (dirtyAnims.timeline) {
+      const allKeyFramesTimelines: { property: string, keyframe: number, effect: ComponentBlockAnimationActionEffect }[] =
+        dirtyAnims.timeline.reduce((acc, t) => ([...acc, ...t.effects
+                  .reduce((acc, e) => ([
+                    ...acc,
+                    ({property: null, keyframe: t.key, effect: e})
+                  ]), [])
+                ]), []
+              );
+      allKeyFrames.push(...allKeyFramesTimelines);
+    }
+
     // const timelines = Object.keys(dirtyAnims.timelines).map(key => ({property: key, timelines: dirtyAnims.timelines[key]})).reduce((acc, t) => ([...acc, t]), [] as {property: string, timelines: ComponentBlockAnimationTimelineActions}[]);
     // const allKeyFrames = timelines.reduce((acc, a) => ([...acc, ...a.timelines.effects.map(e => ({key: a.key, effect: e}))]), [] as {key: number, effect: ComponentBlockAnimationActionEffect}[]);
     const animations = groupBy(allKeyFrames, a => a.effect.type);
@@ -759,25 +807,29 @@ export class BlockRendererService {
         const frameY = startY + (endY - startY) * progress;
         // this.renderer.setStyle(target, 'top', frameX);
         // this.renderer.setStyle(target, 'left', frameY);
-        const animation: AnimationMetadata | AnimationMetadata[] = [style({'position': 'relative', 'top': frameY + 'px', left: frameX + 'px'})];
+        const animation: AnimationMetadata | AnimationMetadata[] = [style({
+          'position': 'relative',
+          'top': frameY + 'px',
+          left: frameX + 'px'
+        })];
         this.playAnimation(animation, target);
       },
       buildAnimationFrame: (effect: ComponentBlockAnimationActionEffect) => {
         const styles: AnimationStyle = {};
-        if(effect.options.y) {
+        if (effect.options.y) {
           styles.top = effect.options.y;
         }
-        if(effect.options.x) {
+        if (effect.options.x) {
           styles.left = effect.options.x;
         }
         return styles;
       },
       buildAnimeFrame: (effect: ComponentBlockAnimationActionEffect) => {
         const styles: AnimationStyle = {};
-        if(effect.options.y) {
+        if (effect.options.y) {
           styles.top = effect.options.y;
         }
-        if(effect.options.x) {
+        if (effect.options.x) {
           styles.left = effect.options.x;
         }
         return styles;
@@ -792,26 +844,26 @@ export class BlockRendererService {
       buildAnimationFrame: (effect: ComponentBlockAnimationActionEffect) => {
         const styles: AnimationStyle = {composite: 'add'};
         styles.transform = '';
-        if(effect.options.y) {
-          styles.transform = styles.transform + ' rotateY('+effect.options.y+')';
+        if (effect.options.y) {
+          styles.transform = styles.transform + ' rotateY(' + effect.options.y + ')';
         }
-        if(effect.options.x) {
-          styles.transform = styles.transform + ' rotateX('+effect.options.x+')';
+        if (effect.options.x) {
+          styles.transform = styles.transform + ' rotateX(' + effect.options.x + ')';
         }
-        if(effect.options.z) {
-          styles.transform = styles.transform + ' rotateZ('+effect.options.z+')';
+        if (effect.options.z) {
+          styles.transform = styles.transform + ' rotateZ(' + effect.options.z + ')';
         }
         return styles;
       },
       buildAnimeFrame: (effect: ComponentBlockAnimationActionEffect) => {
         const styles: AnimationStyle = {};
-        if(effect.options.y) {
+        if (effect.options.y) {
           styles.rotateY = effect.options.y;
         }
-        if(effect.options.x) {
+        if (effect.options.x) {
           styles.rotateX = effect.options.x;
         }
-        if(effect.options.z) {
+        if (effect.options.z) {
           styles.rotateZ = effect.options.z;
         }
         return styles;
@@ -831,7 +883,7 @@ export class BlockRendererService {
 
   private runComponentAnimation(
     actionName: string, animation: ComponentBlockAnimationAction[], eventValue: number, handler: ComponentBlockAnimationActionType,
-    animations: {effectTypeName: string, effectType: ComponentBlockAnimationActionEffectType, targets: {target: string, effects: {key: number, effect: ComponentBlockAnimationActionEffect}[]}[]}[]
+    animations: { effectTypeName: string, effectType: ComponentBlockAnimationActionEffectType, targets: { target: string, effects: { key: number, effect: ComponentBlockAnimationActionEffect }[] }[] }[]
   ) {
     animations.forEach(a => {
       a.targets.forEach(at => {
@@ -839,13 +891,12 @@ export class BlockRendererService {
 
         if (targetBlock) {
           const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
-          let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-          let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+          let prevEffect: { key: number, effect: ComponentBlockAnimationActionEffect };
+          let nextEffect: { key: number, effect: ComponentBlockAnimationActionEffect };
           if (nextKeyIndex > -1) {
             prevEffect = at.effects[nextKeyIndex - 1];
             nextEffect = at.effects[nextKeyIndex];
-          }
-          else {
+          } else {
             prevEffect = null;
             nextEffect = null;
           }
@@ -861,7 +912,7 @@ export class BlockRendererService {
 
   private buildComponentAnimation(
     animations: NormalizedAnimation[], event: Observable<number>
-  ) {
+    , actionType: ComponentBlockAnimationActionType) {
     // timed animations
     // animations.forEach(a => {
     //   a.targets.forEach(at => {
@@ -973,7 +1024,7 @@ export class BlockRendererService {
                   keyframes: anim.frames,
                   duration: 1,
                   easing: 'linear'
-                // }, 0, true);
+                  // }, 0, true);
                 });
                 return {property: anim.property, player: builtAnim};
               });
@@ -997,44 +1048,52 @@ export class BlockRendererService {
           event
         ]).pipe(takeUntil(this.destroy))
           .subscribe(([player, eventValue]) => {
-            // const allAnims = at.properties.map(property => {
-            //   const frames = property.effects.map(e => ({...a.effectType.buildAnimationFrame(e.effect), offset: e.keyframe}));
-            //   // const framesGroupByKeyframe = groupBy(frames, f => f.keyframe);
-            //   const anim: AnimationStyleMetadata[] = frames.map(f => style(f));
-            //   return {property: property.property, animation: anim};
-            // });
-            // allAnims.forEach(anim => {
-            //   const builtAnim = animate('1s', keyframes(anim.animation));
-            //   const factory = this.animationBuilder.build([builtAnim]);
-            //   const player = factory.create(target);
-            //   player.play();
-            //   player.pause();
-            //   player.setPosition(eventValue[anim.property]);
-            // });
+              // const allAnims = at.properties.map(property => {
+              //   const frames = property.effects.map(e => ({...a.effectType.buildAnimationFrame(e.effect), offset: e.keyframe}));
+              //   // const framesGroupByKeyframe = groupBy(frames, f => f.keyframe);
+              //   const anim: AnimationStyleMetadata[] = frames.map(f => style(f));
+              //   return {property: property.property, animation: anim};
+              // });
+              // allAnims.forEach(anim => {
+              //   const builtAnim = animate('1s', keyframes(anim.animation));
+              //   const factory = this.animationBuilder.build([builtAnim]);
+              //   const player = factory.create(target);
+              //   player.play();
+              //   player.pause();
+              //   player.setPosition(eventValue[anim.property]);
+              // });
 
-            player.forEach(p => {
-              p.player.seek(eventValue[p.property]);
-            });
+            if(actionType.progressive) {
+              player.forEach(p => {
+                p.player.seek(p.property ? eventValue[p.property] : eventValue);
+              });
+            }
+            else {
+              player.forEach(p => {
+                p.player.play();
+              });
+            }
 
-            // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
-            // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-            // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-            // if (nextKeyIndex > -1) {
-            //   prevEffect = at.effects[nextKeyIndex - 1];
-            //   nextEffect = at.effects[nextKeyIndex];
-            // }
-            // else {
-            //   prevEffect = null;
-            //   nextEffect = null;
-            // }
-            //
-            // const keyLength = nextEffect.key - prevEffect.key;
-            // const relativeValue = eventValue - prevEffect.key;
-            // const progress = relativeValue / keyLength;
-            //
-            // targetPlayer.setPosition(progress);
-          }
-        );
+
+              // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
+              // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+              // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+              // if (nextKeyIndex > -1) {
+              //   prevEffect = at.effects[nextKeyIndex - 1];
+              //   nextEffect = at.effects[nextKeyIndex];
+              // }
+              // else {
+              //   prevEffect = null;
+              //   nextEffect = null;
+              // }
+              //
+              // const keyLength = nextEffect.key - prevEffect.key;
+              // const relativeValue = eventValue - prevEffect.key;
+              // const progress = relativeValue / keyLength;
+              //
+              // targetPlayer.setPosition(progress);
+            }
+          );
       });
     });
   }

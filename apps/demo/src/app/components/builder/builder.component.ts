@@ -22,6 +22,7 @@ import {exportPlugin} from "../../plugins/export.plugin";
 import {RxShaperService} from "../../services/rxshaper.service";
 import {AnimationMetadata} from "@angular/animations";
 import {Observable} from "rxjs";
+import {RendererService} from "../renderer/renderer.service";
 // export type SupportedPresetType = 'webpage' | 'newsletter' | 'mjml';
 
 // const presets: Record<SupportedPresetType, any> = {
@@ -63,16 +64,19 @@ export interface ComponentBlockAnimationActionType {
   name: string, // mousePos, scroll, ... click, enter, leave
   label?: string,
   progressive: boolean // mouse pos and scroll are progressives, click, enter, leave are not progressive
-  timelines: {
-    [key:string]: {
-      label?: string, // for ui
-      symbol?: string, // for ui
-      min?: number, // default 0
-      max?: number // default 100
-      values?: string|number;
-    }
-  }
-  build: (el: HTMLElement) => Observable<any>
+  timelines?: {
+    [key:string]: ComponentBlockAnimationActionTypeTimeline
+  },
+  timeline?: ComponentBlockAnimationActionTypeTimeline,
+  build: (el: HTMLElement, options: any, manager: RendererService, shaper: RxShaperService) => Observable<any>
+}
+
+export interface ComponentBlockAnimationActionTypeTimeline {
+  label?: string, // for ui
+  symbol?: string, // for ui
+  min?: number, // default 0
+  max?: number // default 100
+  values?: string|number;
 }
 
 export interface ComponentBlockAnimationActions {
@@ -81,7 +85,8 @@ export interface ComponentBlockAnimationActions {
 
 export interface ComponentBlockAnimationActionProperties {
   options?: any
-  timelines: ComponentBlockAnimationTimelineActions
+  timelines?: ComponentBlockAnimationTimelineActions
+  timeline?: ComponentBlockAnimationAction[]
 }
 
 export interface ComponentBlockAnimationTimelineActions {

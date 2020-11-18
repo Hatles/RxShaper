@@ -107,6 +107,11 @@ export const components: ComponentBlock[] =
             "test": "1.1",
             "test2": "1.1"
           },
+          style: {
+            large: {
+             "margin-top": "700px",
+            }
+          },
           // animationActions: testAnimations,
           bindings: {
             test: 'returnValue(fetch("https://jsonplaceholder.typicode.com/todos/1").then(res => res.json()).then(json => JSON.stringify(json)));',
@@ -132,6 +137,31 @@ export const components: ComponentBlock[] =
                   "border": "3px solid yellow",
                 }
               },
+              animationActions: {
+                mouseenter: {
+                  timeline: [
+                    {key: 0, effects: [{type: 'rotate', target: 'self', options: {z: 0}}]},
+                    {key: 1000, effects: [{type: 'rotate', target: 'self', options: {z: 180}}]},
+                  ]
+                },
+                mouseleave: {
+                  timeline: [
+                    {key: 0, effects: [{type: 'rotate', target: 'self', options: {z: 180}}]},
+                    {key: 1000, effects: [{type: 'rotate', target: 'self', options: {z: 360}}]},
+                  ]
+                },
+                enterviewport: {
+                  options: {
+                    threshold: 1
+                  },
+                  timeline: [
+                    {key: 0, effects: [{type: 'opacity', target: 'self', options: {percent: 0}}]},
+                    {key: 1000, effects: [{type: 'opacity', target: 'self', options: {percent: 1}}]},
+                    {key: 0, effects: [{type: 'move', target: 'self', options: {y: 100}}]},
+                    {key: 1000, effects: [{type: 'move', target: 'self', options: {y: 0}}]},
+                  ]
+                }
+              }
             },
             {
               "type": "Text",
@@ -246,6 +276,17 @@ export const components: ComponentBlock[] =
                 ]
               }
             },
+            enterviewport: {
+              options: {
+                threshold: 1
+              },
+              timeline: [
+                {key: 0, effects: [{type: 'opacity', target: 'self', options: {percent: 0}}]},
+                {key: 1000, effects: [{type: 'opacity', target: 'self', options: {percent: 1}}]},
+                {key: 0, effects: [{type: 'move', target: 'self', options: {y: 100}}]},
+                {key: 1000, effects: [{type: 'move', target: 'self', options: {y: 0}}]},
+              ]
+            }
           },
           children: [
             {
