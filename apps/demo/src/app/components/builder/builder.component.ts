@@ -86,7 +86,8 @@ export interface ComponentBlockAnimationActions {
 export interface ComponentBlockAnimationActionProperties {
   options?: any
   timelines?: ComponentBlockAnimationTimelineActions
-  timeline?: ComponentBlockAnimationAction[]
+  timeline?: ComponentBlockAnimationAction[],
+  target?: ComponentBlockSelector // default is self
 }
 
 export interface ComponentBlockAnimationTimelineActions {
@@ -105,7 +106,7 @@ export interface ComponentBlockAnimationActionEffectType {
   progressive: boolean
   handler: (prevEffect: ComponentBlockAnimationActionEffect, nextEffect: ComponentBlockAnimationActionEffect, target: HTMLElement, progress: number) => void
 }
-export type ComponentBlockSelector = 'children' | 'parent' | 'self' | string;
+export type ComponentBlockSelector = 'children' | 'parent' | 'self' | 'root' | string;
 // export type AnimationStyle = '*' | {
 //   [key: string]: string | number;
 // } | Array<'*' | {
@@ -171,6 +172,7 @@ export interface ComponentBlock {
   type: string;
   id?: string;
   class?: string[];
+  attributes?: {[key:string]: string};
   options?: any
   children?: ComponentBlock[]
   childrenContainerLayout?: ComponentBlockContainerLayout

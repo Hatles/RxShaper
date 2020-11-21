@@ -25,6 +25,9 @@ export class BlockRendererDirective implements OnInit, OnDestroy {
   @Input()
   component: ComponentBlock;
 
+  @Input()
+  root: boolean;
+
   service: BlockRendererService;
 
   /**
@@ -51,7 +54,7 @@ export class BlockRendererDirective implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.service.onInit(this.component);
+    this.service.onInit(this.component, this.root);
   }
 
   ngOnDestroy(): void {

@@ -36,6 +36,7 @@ export class RendererStore<S> {
 @Injectable()
 export class RendererService {
   private store: RendererStore<RendererState>;
+  private rootBlockRenderer: BlockRendererService;
 
   constructor(@Inject(RXSHAPER_VIEWPORT) public viewport: HTMLElement | any) {
     this.store = new RendererStore<RendererState>({});
@@ -58,5 +59,13 @@ export class RendererService {
     const state = {...this.store.getValue()};
     delete state[id];
     this.store.set(state);
+  }
+
+  registerRoot(block: BlockRendererService) {
+    this.rootBlockRenderer = block;
+  }
+
+  getRoot(): BlockRendererService {
+    return this.rootBlockRenderer;
   }
 }

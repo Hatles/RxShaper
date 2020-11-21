@@ -4,6 +4,9 @@ import {RxShaperService} from "../services/rxshaper.service";
 export type RxShaperExtensionFunction<T = any, P = any> = (shaper: RxShaperService, renderer: BlockRendererService, properties: P) => T;
 
 export interface RxShaperExtension<T = any> {
+  beforeInitPage(shaper: RxShaperService, rootRenderer: BlockRendererService, properties: T): void;
+  afterInitPage(shaper: RxShaperService, rootRenderer: BlockRendererService, properties: T): void;
+
   onInit(shaper: RxShaperService, renderer: BlockRendererService, properties: T): void;
   onDestroy(shaper: RxShaperService, renderer: BlockRendererService, properties: T): void;
 
@@ -54,5 +57,11 @@ export class BaseRxShaperExtension<P = any> implements RxShaperExtension<P> {
   }
 
   onInit(shaper: RxShaperService, renderer: BlockRendererService, properties: P): void {
+  }
+
+  afterInitPage(shaper: RxShaperService, rootRenderer: BlockRendererService, properties: P): void {
+  }
+
+  beforeInitPage(shaper: RxShaperService, rootRenderer: BlockRendererService, properties: P): void {
   }
 }

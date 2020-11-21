@@ -20,9 +20,9 @@ import {
 import {RxShaperService} from "../../services/rxshaper.service";
 import {DOCUMENT} from "@angular/common";
 import {
-  animationFrameScheduler,
+  animationFrameScheduler, BehaviorSubject,
   combineLatest,
-  fromEvent,
+  fromEvent, merge,
   Observable,
   of,
   ReplaySubject,
@@ -324,13 +324,15 @@ export class BlockRendererService {
   childrenView: EmbeddedViewRef<any>;
   childrenContainer: ViewContainerRef;
 
-  childrenRenderers: BlockRendererService[] = [];
+  childrenRenderers: BehaviorSubject<BlockRendererService[]> = new BehaviorSubject<BlockRendererService[]>([]);
 
   // custom properties for extensions
   properties: ExtensionProperties = {};
   componentState: ComponentStateManager;
   // scriptRunner: ScriptRunner = new VmScriptRunner();
   scriptRunner: ScriptRunner = new FunctionScriptRunner();
+
+  isRoot: boolean;
 
   /**
    * @param container
@@ -352,17 +354,18 @@ export class BlockRendererService {
     private shaperManager: RendererService,
     @Optional() @SkipSelf() private parent?: BlockRendererService,
   ) {
-    if (parent) {
-      parent.registerChild(this);
-    }
-
     this.animationBuilder = this.injector.get(AnimationBuilder);
   }
 
   private animationBuilder: AnimationBuilder;
 
-  onInit(component: ComponentBlock): void {
+  onInit(component: ComponentBlock, root: boolean = false): void {
     this.component = component;
+    this.isRoot = root;
+    if (root) {
+      this.beforeInitPage();
+    }
+
     this.executeExtensions((e) => e.onInit);
     this.fixComponent();
 
@@ -370,7 +373,22 @@ export class BlockRendererService {
     this.render();
     this.executeExtensions((e) => e.afterRender);
 
+    if (root) {
+      this.afterInitPage();
+    }
+    if (this.parent) {
+      this.parent.registerChild(this);
+    }
     this.shaperManager.register(this.component.id, this);
+  }
+
+  private beforeInitPage() {
+    this.shaperManager.registerRoot(this);
+    this.executeExtensions(e => e.beforeInitPage);
+  }
+
+  private afterInitPage() {
+    this.executeExtensions(e => e.afterInitPage);
   }
 
   private render() {
@@ -404,6 +422,7 @@ export class BlockRendererService {
     this.executeExtensions((e) => e.afterCreateState);
 
     this.executeExtensions((e) => e.beforeApplyStyle);
+    this.applyClassAndAttributes();
     this.applyStyle();
     this.executeExtensions((e) => e.afterApplyStyle);
 
@@ -625,10 +644,10 @@ export class BlockRendererService {
 
         const normalizedAnimations: NormalizedAnimation[] = this.normalizeAnimations(animations);
 
-        const {event, actionType} = this.buildAnimationEvent(eventTypeName, animations, this.componentRef.location.nativeElement);
+        const {events, actionType} = this.buildAnimationEvents(eventTypeName, animations, this.componentRef.location.nativeElement);
 
-        if (normalizedAnimations && event) {
-          this.buildComponentAnimation(normalizedAnimations, event, actionType);
+        if (normalizedAnimations && events) {
+          this.buildComponentAnimation(normalizedAnimations, events, actionType);
         }
       });
     }
@@ -693,11 +712,17 @@ export class BlockRendererService {
     }
   ];
 
-  private buildAnimationEvent(eventTypeName: string, animations: ComponentBlockAnimationActionProperties, el: HTMLElement): { event: Observable<any>; actionType: ComponentBlockAnimationActionType } {
+  private buildAnimationEvents(eventTypeName: string, animations: ComponentBlockAnimationActionProperties, el: HTMLElement): { events: Observable<{source: BlockRendererService, event: Observable<any>}[]>; actionType: ComponentBlockAnimationActionType } {
     const eventType = this._eventTypes.find(e => e.name === eventTypeName);
+    const targetSelector = animations.target || 'self';
+
 
     if (eventType) {
-      return {event: eventType.build(el, animations.options, this.shaperManager, this.shaper), actionType: eventType};
+      const targets = this.getBlocksChanges(targetSelector);
+      const events = targets.pipe(map(ts => {
+        return ts.map(t => ({source: t, event: eventType.build(t.componentRef.location.nativeElement, animations.options, this.shaperManager, this.shaper)}));
+      }));
+      return {events: events, actionType: eventType};
     }
 
     return null;
@@ -911,191 +936,117 @@ export class BlockRendererService {
   }
 
   private buildComponentAnimation(
-    animations: NormalizedAnimation[], event: Observable<number>
+    animations: NormalizedAnimation[], events: Observable<{ source: BlockRendererService; event: Observable<any> }[]>
     , actionType: ComponentBlockAnimationActionType) {
-    // timed animations
-    // animations.forEach(a => {
-    //   a.targets.forEach(at => {
-    //     const anim: AnimationMetadata[] = a.effectType.buildAnimation(at.effects);
-    //     const factory = this.animationBuilder.build(anim);
-    //
-    //     const targetBlock = this.animationTargetChanges(at.target);
-    //
-    //     combineLatest([
-    //       targetBlock.pipe(
-    //         filter(t => !!t),
-    //         map(target => {
-    //           const player = factory.create(target.componentRef.location.nativeElement);
-    //           player.play();
-    //           player.pause();
-    //           return player;
-    //         })
-    //       ),
-    //       event
-    //     ]).pipe(takeUntil(this.destroy))
-    //       .subscribe(([targetPlayer, eventValue]) => {
-    //         // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
-    //         // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-    //         // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-    //         // if (nextKeyIndex > -1) {
-    //         //   prevEffect = at.effects[nextKeyIndex - 1];
-    //         //   nextEffect = at.effects[nextKeyIndex];
-    //         // }
-    //         // else {
-    //         //   prevEffect = null;
-    //         //   nextEffect = null;
-    //         // }
-    //         //
-    //         // const keyLength = nextEffect.key - prevEffect.key;
-    //         // const relativeValue = eventValue - prevEffect.key;
-    //         // const progress = relativeValue / keyLength;
-    //         //
-    //         // targetPlayer.setPosition(progress);
-    //         targetPlayer.setPosition(eventValue);
-    //       }
-    //     );
-    //   });
-    // });
 
-    animations.forEach(a => {
-      a.targets.forEach(at => {
-        // const anim: AnimationMetadata[] = a.effectType.buildAnimation(at.effects);
-        // const factory = this.animationBuilder.build(anim);
+    const allEvents = events.pipe(switchMap(eventSources => {
+      const finalEvents: Observable<any>[] =
+        eventSources.reduce((acc1, eventSource) => {
+        return [...acc1, ...animations.reduce((acc, a) => {
+          return [...acc, ...a.targets.map(at => {
 
-        const targetBlock = this.animationTargetChanges(at.target);
+            const targetBlocks$ = eventSource.source.getBlocksChanges(at.target);
 
-        combineLatest([
-          targetBlock.pipe(
-            filter(t => !!t),
-            map(targetBlock => {
-              // const player = factory.create(target.componentRef.location.nativeElement);
-              // player.play();
-              // player.pause();
-              // return player;
-              const target = targetBlock.componentRef.location.nativeElement;
-              const allAnims = at.properties.map(property => {
-                let prevKeyframe: number = 0;
-                const frames = property.effects.map(e => {
-                  const duration = e.keyframe - prevKeyframe;
-                  prevKeyframe = e.keyframe;
-                  return ({...a.effectType.buildAnimeFrame(e.effect), duration: duration});
-                });
-                return {property: property.property, frames: frames};
-              });
+            const targetEvent = combineLatest([
+              targetBlocks$.pipe(
+                map(targetBlocks => {
+                  return targetBlocks
+                    .filter(t => !!t)
+                    .map(targetBlock => {
 
-              //
-              //
-              // const tl = anime.timeline({
-              //   targets: target,
-              //   delay: function(el, i) { return i * 200; },
-              //   duration: 500, // Can be inherited
-              //   easing: 'linear', // Can be inherited
-              //   // direction: 'alternate', // Is not inherited
-              //   translateX: 500,
-              //   loop: true // Is not inherited
-              // });
-              //
-              // tl
-              //   .add({
-              //     translateY: 250,
-              //     // override the easing parameter
-              //     // easing: 'spring',
-              //   }, 0)
-              //   // .add({
-              //   //   // opacity: .5,
-              //   //   // scale: 2
-              //   // }, 0)
-              //   // .add({
-              //   //   // override the targets parameter
-              //   //   // rotate: 180
-              //   // }, 0)
-              //   // .add({
-              //   //   // translateX: 0,
-              //   //   // scale: 1
-              //   // }, 0)
-              // ;
+                    const target = targetBlock.componentRef.location.nativeElement;
+                    const allAnims = at.properties.map(property => {
+                      let prevKeyframe: number = 0;
+                      const frames = property.effects.map(e => {
+                        const duration = e.keyframe - prevKeyframe;
+                        prevKeyframe = e.keyframe;
+                        return ({...a.effectType.buildAnimeFrame(e.effect), duration: duration});
+                      });
+                      return {property: property.property, frames: frames};
+                    });
 
-              // const parent = timeline({targets: target});
-              return allAnims.map(anim => {
-                // const builtAnim = (parent as any).add({
-                const builtAnim = anime({
-                  autoplay: false,
-                  targets: target,
-                  keyframes: anim.frames,
-                  duration: 1,
-                  easing: 'linear'
-                  // }, 0, true);
-                });
-                return {property: anim.property, player: builtAnim};
-              });
+                    // const parent = timeline({targets: target});
+                    return allAnims.map(anim => {
+                      // const builtAnim = (parent as any).add({
+                      const builtAnim = anime({
+                        autoplay: false,
+                        targets: target,
+                        keyframes: anim.frames,
+                        duration: 1,
+                        easing: 'linear'
+                        // }, 0, true);
+                      });
+                      return {property: anim.property, player: builtAnim};
+                    });
 
-              // const a = anime({
-              //   targets: target,
-              //   keyframes: [
-              //     {translateY: -40},
-              //     {translateX: 250},
-              //     {translateY: 40},
-              //     {translateX: 0},
-              //     {translateY: 0}
-              //   ],
-              //   duration: 4000,
-              //   easing: 'easeOutElastic(1, .8)',
-              //   loop: true
-              // });
+                  });
+                })
+              ),
+              eventSource.event
+            ]).pipe(
+              takeUntil(this.destroy),
+              tap(([players, eventValue]) => {
+                  // const allAnims = at.properties.map(property => {
+                  //   const frames = property.effects.map(e => ({...a.effectType.buildAnimationFrame(e.effect), offset: e.keyframe}));
+                  //   // const framesGroupByKeyframe = groupBy(frames, f => f.keyframe);
+                  //   const anim: AnimationStyleMetadata[] = frames.map(f => style(f));
+                  //   return {property: property.property, animation: anim};
+                  // });
+                  // allAnims.forEach(anim => {
+                  //   const builtAnim = animate('1s', keyframes(anim.animation));
+                  //   const factory = this.animationBuilder.build([builtAnim]);
+                  //   const player = factory.create(target);
+                  //   player.play();
+                  //   player.pause();
+                  //   player.setPosition(eventValue[anim.property]);
+                  // });
 
-            })
-          ),
-          event
-        ]).pipe(takeUntil(this.destroy))
-          .subscribe(([player, eventValue]) => {
-              // const allAnims = at.properties.map(property => {
-              //   const frames = property.effects.map(e => ({...a.effectType.buildAnimationFrame(e.effect), offset: e.keyframe}));
-              //   // const framesGroupByKeyframe = groupBy(frames, f => f.keyframe);
-              //   const anim: AnimationStyleMetadata[] = frames.map(f => style(f));
-              //   return {property: property.property, animation: anim};
-              // });
-              // allAnims.forEach(anim => {
-              //   const builtAnim = animate('1s', keyframes(anim.animation));
-              //   const factory = this.animationBuilder.build([builtAnim]);
-              //   const player = factory.create(target);
-              //   player.play();
-              //   player.pause();
-              //   player.setPosition(eventValue[anim.property]);
-              // });
-
-            if(actionType.progressive) {
-              player.forEach(p => {
-                p.player.seek(p.property ? eventValue[p.property] : eventValue);
-              });
-            }
-            else {
-              player.forEach(p => {
-                p.player.play();
-              });
-            }
+                  if(actionType.progressive) {
+                    players.forEach(player => {
+                      player.forEach(p => {
+                        p.player.seek(p.property ? eventValue[p.property] : eventValue);
+                      });
+                    });
+                  }
+                  else {
+                    players.forEach(player => {
+                      player.forEach(p => {
+                        p.player.play();
+                      });
+                    });
+                  }
 
 
-              // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
-              // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-              // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
-              // if (nextKeyIndex > -1) {
-              //   prevEffect = at.effects[nextKeyIndex - 1];
-              //   nextEffect = at.effects[nextKeyIndex];
-              // }
-              // else {
-              //   prevEffect = null;
-              //   nextEffect = null;
-              // }
-              //
-              // const keyLength = nextEffect.key - prevEffect.key;
-              // const relativeValue = eventValue - prevEffect.key;
-              // const progress = relativeValue / keyLength;
-              //
-              // targetPlayer.setPosition(progress);
-            }
-          );
-      });
-    });
+                  // const nextKeyIndex = at.effects.findIndex(e => e.key > eventValue);
+                  // let prevEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+                  // let nextEffect: {key: number, effect: ComponentBlockAnimationActionEffect};
+                  // if (nextKeyIndex > -1) {
+                  //   prevEffect = at.effects[nextKeyIndex - 1];
+                  //   nextEffect = at.effects[nextKeyIndex];
+                  // }
+                  // else {
+                  //   prevEffect = null;
+                  //   nextEffect = null;
+                  // }
+                  //
+                  // const keyLength = nextEffect.key - prevEffect.key;
+                  // const relativeValue = eventValue - prevEffect.key;
+                  // const progress = relativeValue / keyLength;
+                  //
+                  // targetPlayer.setPosition(progress);
+                }
+              )
+            );
+            // targetEvent.subscribe();
+            return targetEvent;
+          })];
+        }, [] as Observable<any>[])];
+      }, []);
+
+      return combineLatest(finalEvents);
+    }));
+
+    allEvents.pipe(takeUntil(this.destroy)).subscribe();
   }
 
   private getAnimationTarget(target: ComponentBlockSelector): BlockRendererService {
@@ -1118,24 +1069,82 @@ export class BlockRendererService {
     return null;
   }
 
-  private animationTargetChanges(target: ComponentBlockSelector): Observable<BlockRendererService> {
+  animationTargetChanges(target: ComponentBlockSelector): Observable<BlockRendererService[]> {
     switch (target) {
       case "children":
-        return of(null);
-        break;
+        return this.childrenRenderers.asObservable();
       case "parent":
-        return of(this.parent);
-        break;
+        return of([this.parent]);
       case 'self':
-        return of(this);
+        return of([this]);
+      case 'root':
+        return of([this.shaperManager.getRoot()]);
+    }
+
+    if (target.startsWith('.')) {
+      const className = target.substring(1);
+      return this.childrenRenderers.asObservable()
+        .pipe(
+          switchMap(children => {
+            const start = this.component.class && this.component.class.some(c => c === className) ? of([this]) : of([]);
+            const obsChildren = [start, ...children.map(c => c.animationTargetChanges(target))];
+            return combineLatest(obsChildren)
+              .pipe(map(children => {
+                return children.reduce((acc, c) => [...acc, ...c], []);
+              }));
+          })
+        );
     }
 
     if (target.startsWith('#')) {
       const id = target.substring(1);
-      return this.shaperManager.blocksChanges(id);
+      return this.shaperManager.blocksChanges(id).pipe(map(b => b ? [b] : []));
     }
 
-    return of(null);
+    return of([]);
+  }
+
+  getBlocksChanges(target: ComponentBlockSelector | string[]): Observable<BlockRendererService[]> {
+    if (typeof target === 'string') {
+      target = target.split(' ');
+    }
+
+    if(!target.length) {
+      return of([]);
+    }
+
+    const firstTarget = target[0];
+    const nextTargets = target.slice(1);
+
+    const firstTarget$ = this.animationTargetChanges(firstTarget);
+    return firstTarget$.pipe(switchMap(blocks => {
+      if (nextTargets.length) {
+        return combineLatest(blocks.map(b => b.getBlocksChanges(nextTargets)))
+          .pipe(map(childrenBlocks => {
+            return childrenBlocks.reduce((acc, b) => [...acc, ...b], []);
+          }));
+      }
+      else {
+        return of(blocks);
+      }
+    }));
+  }
+
+  private applyClassAndAttributes() {
+    if (this.component.class) {
+      this.component.class.forEach(className => {
+        this.renderer.addClass(this.componentRef.location.nativeElement, className);
+      });
+    }
+    if (this.component.attributes) {
+      Object.keys(this.component.attributes).forEach(attrKey => {
+        const attrValue = this.component.attributes[attrKey];
+        this.renderer.setAttribute(this.componentRef.location.nativeElement, attrKey, attrValue);
+      });
+    }
+
+    this.renderer.addClass(this.componentRef.location.nativeElement, 'rxshaper-block'); // add rxshaper block class
+    this.renderer.addClass(this.componentRef.location.nativeElement, this.component.id);
   }
 
   private applyStyle() {
@@ -1177,6 +1186,7 @@ export class BlockRendererService {
     }
 
     this.renderer.addClass(this.componentRef.location.nativeElement, 'rxshaper-block'); // add rxshaper block class
+    this.renderer.addClass(this.componentRef.location.nativeElement, 'rxshaper-block-' + this.componentType.name); // add rxshaper block class
     this.renderer.addClass(this.componentRef.location.nativeElement, this.component.id);
 
     if (this.component.class && this.component.class.length) {
@@ -1251,7 +1261,7 @@ export class BlockRendererService {
   }
 
   onDestroy(): void {
-    this.childrenRenderers.forEach(c => c.onDestroy());
+    this.childrenRenderers.value.forEach(c => c.onDestroy());
     this.shaperManager.unregister(this.component.id);
 
     this.componentState.onDestroy();
@@ -1263,7 +1273,11 @@ export class BlockRendererService {
   }
 
   private registerChild(child: BlockRendererService) {
-    this.childrenRenderers.push(child);
+    this.childrenRenderers.next([...this.childrenRenderers.value, child]);
+  }
+
+  private unregisterChild(child: BlockRendererService) {
+    this.childrenRenderers.next(this.childrenRenderers.value.filter(e => e !== child));
   }
 }
 

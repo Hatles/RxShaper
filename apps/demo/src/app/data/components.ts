@@ -95,7 +95,8 @@ export const components: ComponentBlock[] =
         large: {
           "background-color": "red",
           "border": "3px solid black",
-          "perspective": '500px'
+          "perspective": '500px',
+          "padding-bottom": "200px"
         }
       },
       class: ['test-class'],
@@ -122,6 +123,8 @@ export const components: ComponentBlock[] =
           "children": [
             {
               "type": "Block",
+              "id": "appearing",
+              "class": ['scroll-appear'],
               "options": {
                 "test": "1.1.1",
                 "test2": "1.1.1"
@@ -151,6 +154,7 @@ export const components: ComponentBlock[] =
                   ]
                 },
                 enterviewport: {
+                  target: 'root .scroll-appear',
                   options: {
                     threshold: 1
                   },
@@ -321,6 +325,28 @@ export const components: ComponentBlock[] =
               }
             }
           ]
+        },
+        {
+          "type": "Text",
+          "id": "text2",
+          'class': ['scroll-appear'],
+          "options": {text: 'test text block appear 1'},
+          "style": {
+            large: {
+              position: 'relative'
+            }
+          }
+        },
+        {
+          "type": "Text",
+          "id": "text3",
+          'class': ['scroll-appear'],
+          "options": {text: 'test text block appear 2'},
+          "style": {
+            large: {
+              position: 'relative'
+            }
+          }
         }
       ]
     }
