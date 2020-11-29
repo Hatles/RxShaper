@@ -1,9 +1,8 @@
-import {BlockWrapper} from "./block.wrapper";
-import {RxShaperService} from "./rxshaper.service";
-import {BlockRendererService} from "../components/block-renderer/block-renderer.service";
+
 import {ComponentFactoryResolver, ComponentRef, Injectable, ViewContainerRef} from "@angular/core";
 import {WrapperTestComponent} from "../components/wrapper-test/wrapper-test.component";
 import {Subject} from "rxjs";
+import {BlockRendererService, BlockWrapper, RxShaperService} from "@rxshaper/core";
 
 @Injectable()
 export class TestWrapper implements BlockWrapper {

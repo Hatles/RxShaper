@@ -1,6 +1,6 @@
 import {Component, ElementRef, InjectionToken, Input, OnInit, Self} from '@angular/core';
-import {ComponentBlock} from "../builder/builder.component";
-import {RendererService, RXSHAPER_VIEWPORT} from "./renderer.service";
+import {RendererService, RXSHAPER_VIEWPORT} from "../../services/renderer.service";
+import {ComponentBlock} from "../../models/block";
 
 export function shaperViewportFactory(component: RendererComponent): HTMLElement | any {
   return component.elementRef.nativeElement;

@@ -4,7 +4,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {TestWrapper} from "../../services/test.wrapper";
-import {BlockRendererService} from "../block-renderer/block-renderer.service";
+import {BlockRendererService} from "@rxshaper/core";
 
 @Component({
   selector: 'wrapper-test',

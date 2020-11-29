@@ -8,7 +8,7 @@ import {
   SkipSelf,
   ViewChild, ViewChildren, ViewContainerRef
 } from '@angular/core';
-import {BuilderBlockOutput, ComponentBuilder, Trait} from "../../decorators/block.decorator";
+import {BuilderBlockOutput, ComponentBuilder, Trait} from "@rxshaper/core";
 
 export interface HasContainer {
   getContainer(): HTMLElement

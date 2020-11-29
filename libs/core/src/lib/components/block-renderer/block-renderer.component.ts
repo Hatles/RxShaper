@@ -1,20 +1,11 @@
 import {
   Component,
-  ComponentFactoryResolver,
-  Inject,
-  Injector,
   Input,
   OnDestroy,
   OnInit,
-  Optional,
-  Renderer2,
-  SkipSelf,
-  ViewContainerRef
 } from '@angular/core';
-import {ComponentBlock} from "../builder/builder.component";
-import {RxShaperService} from "../../services/rxshaper.service";
-import {DOCUMENT} from "@angular/common";
-import {BlockRendererService} from "./block-renderer.service";
+import {BlockRendererService} from "../../services/block-renderer.service";
+import {ComponentBlock} from "../../models/block";
 
 @Component({
   selector: 'rxshaper-block-renderer',
@@ -29,13 +20,6 @@ export class BlockRendererComponent implements OnInit, OnDestroy {
   service: BlockRendererService;
 
   /**
-   * @param container
-   * @param resolver
-   * @param injector
-   * @param renderer
-   * @param document
-   * @param builder
-   * @param parent
    */
   constructor(
     // private container: ViewContainerRef,

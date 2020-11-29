@@ -1,32 +1,28 @@
-import { BrowserModule } from '@angular/platform-browser';
-import {ComponentFactoryResolver, NgModule} from '@angular/core';
-import { RouterModule } from '@angular/router';
+import {BrowserModule} from '@angular/platform-browser';
+import {NgModule} from '@angular/core';
+import {RouterModule} from '@angular/router';
 
-import { AppComponent } from './app.component';
-import { FooComponent } from './foo.component';
+import {AppComponent} from './app.component';
+import {FooComponent} from './foo.component';
 import {CustomThingComponent} from "./custom-thing.component";
-import { BuilderComponent } from './components/builder/builder.component';
-import { BlockComponent } from './components/block/block.component';
-import { ChildrenHostDirective } from './directives/children-host.directive';
-import { RendererComponent } from './components/renderer/renderer.component';
-import { BlockRendererComponent } from './components/block-renderer/block-renderer.component';
-import {BlockRendererDirective} from "./components/block-renderer/block-renderer.directive";
-import {defaultRxShaperConfig, RxShaperModule} from "./module/rxshaper.module";
+import {BuilderComponent} from './components/builder/builder.component';
+import {BlockComponent} from './components/block/block.component';
+import {ChildrenHostDirective} from './directives/children-host.directive';
 import {TestExtension} from "./extensions/test.extension";
-import {RXSHAPER_OPTIONS, RxShaperOptions} from "./services/rxshaper.options";
+import {RXSHAPER_OPTIONS, RxShaperCoreModule, RxShaperOptions} from "@rxshaper/core";
 import {TextBlock} from "./blocks/text.block";
 import {BoxBlock} from "./blocks/box.block";
 import {WrapperTestComponent} from "./components/wrapper-test/wrapper-test.component";
 import {TestWrapper} from "./services/test.wrapper";
-import { WrapperBlockBoundingsComponent } from './components/wrapper-block-boundings/wrapper-block-boundings.component';
-import { BlockResizerHelperDirective } from './directives/block-resizer-helper.directive';
+import {WrapperBlockBoundingsComponent} from './components/wrapper-block-boundings/wrapper-block-boundings.component';
+import {BlockResizerHelperDirective} from './directives/block-resizer-helper.directive';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
     types: [],
     extensions: [
-      {name: 'test', priority: 1, extension: new TestExtension()}
+      // {name: 'test', priority: 1, extension: new TestExtension()}
     ],
     wrappers: [
       {name: 'test', priority: 1, wrapper: wrapper}
@@ -35,9 +31,43 @@ export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   return rxShaperConfig;
 }
 
+export function defaultRxShaperConfig(): RxShaperOptions {
+  return {
+    types: [
+      // ...RxShaperService.Components
+      {
+        name: 'Block',
+        class: BlockComponent,
+        inputs: [
+          {name: 'test'}
+        ],
+        outputs: [
+          {name: 'doSomething'}
+        ]
+      },
+      {
+        name: 'Box',
+        class: BoxBlock,
+        canHaveChildren: true,
+        noBlock: true,
+      },
+      {
+        name: 'Text',
+        class: TextBlock,
+        noBlock: true,
+        inputs: [
+          {name: 'text'}
+        ],
+      }
+    ],
+    extensions: [
+    ],
+  };
+}
+
 
 @NgModule({
-  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, RendererComponent, BlockRendererComponent, BlockRendererDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
+  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
@@ -48,11 +78,11 @@ export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
         component: FooComponent,
       },
     ]),
-    // RxShaperModule.forRoot(rxShaperConfig),
-    RxShaperModule.forRoot({}),
+    RxShaperCoreModule.forRoot(),
   ],
   providers: [
     TestWrapper,
+    { provide: RXSHAPER_OPTIONS, multi: true, useFactory: defaultRxShaperConfig, deps: [] },
     { provide: RXSHAPER_OPTIONS, multi: true, useFactory: buildRxShaperConfig, deps: [TestWrapper] },
   ],
   bootstrap: [AppComponent],

@@ -1,5 +1,5 @@
-import {ComponentType} from "./component";
-import {RXSHAPER_OPTIONS, RxShaperExtensionOption, RxShaperOptions, RxShaperWrapperOption} from "./rxshaper.options";
+import {ComponentType} from "../models/component";
+import {RXSHAPER_OPTIONS, RxShaperExtensionOption, RxShaperOptions, RxShaperWrapperOption} from "../models/options";
 import {Inject, Injectable, Optional, SkipSelf} from "@angular/core";
 
 export type RxShaperTypes = { [name: string]: ComponentType };

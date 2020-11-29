@@ -6,7 +6,7 @@ import {
   ViewContainerRef
 } from "@angular/core";
 import {Plugin} from "./plugin";
-import {ComponentType} from "../services/component";
+import {ComponentType} from "@rxshaper/core";
 
 export interface BlockPluginOptions {
   injector: Injector;

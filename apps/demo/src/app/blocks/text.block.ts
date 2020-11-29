@@ -1,9 +1,8 @@
 import {
   Component,
   Input,
-  ViewContainerRef
 } from '@angular/core';
-import {ComponentBuilder, Trait} from "../decorators/block.decorator";
+import {ComponentBuilder, Trait} from "@rxshaper/core";
 
 @Component({
   selector: 'p[rxshaper-block-text]',

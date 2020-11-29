@@ -1,7 +1,7 @@
 import {Inject, Injectable, InjectionToken} from "@angular/core";
 import {BehaviorSubject, Observable} from "rxjs";
 import {distinctUntilChanged, map} from "rxjs/operators";
-import {BlockRendererService} from "../block-renderer/block-renderer.service";
+import {BlockRendererService} from "./block-renderer.service";
 
 export const RXSHAPER_VIEWPORT = new InjectionToken<HTMLElement | any>('RXSHAPER_VIEWPORT');
 

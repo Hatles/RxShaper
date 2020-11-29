@@ -1,4 +1,4 @@
-import {ComponentBlock, ComponentBlockAnimationActions} from "../components/builder/builder.component";
+import {ComponentBlock, ComponentBlockAnimationActions} from "@rxshaper/core";
 
 const testAnimations: ComponentBlockAnimationActions = {
   'mousePos': {

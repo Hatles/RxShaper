@@ -1,5 +1,5 @@
 import {RxShaperService} from "./rxshaper.service";
-import {BlockRendererService} from "../components/block-renderer/block-renderer.service";
+import {BlockRendererService} from "./block-renderer.service";
 import {ViewContainerRef} from "@angular/core";
 
 export interface BlockWrapper {

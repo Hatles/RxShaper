@@ -1,6 +1,6 @@
 import {Type} from "@angular/core";
 import {RxShaperService} from "../services/rxshaper.service";
-import {AngularComponentType, BlockInput, BlockOutput} from "../services/component";
+import {AngularComponentType, BlockInput, BlockOutput} from "../models/component";
 
 export type Trait = BlockInput | string;
 

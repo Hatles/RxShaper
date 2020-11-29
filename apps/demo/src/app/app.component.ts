@@ -1,8 +1,6 @@
-import {Component, ComponentRef, ElementRef, ViewChild} from '@angular/core';
-import {RxShaperService} from "./services/rxshaper.service";
-import {ComponentBlock} from "./components/builder/builder.component";
-// import components from "./data/components.json";
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import {components} from "./data/components";
+import {ComponentBlock} from "@rxshaper/core";
 
 @Component({
   selector: 'app-root',
