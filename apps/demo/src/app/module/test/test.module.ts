@@ -5,8 +5,8 @@ import {TestComponent} from "./test.component";
 import {RouteData, TestService} from "./test.service";
 import {of} from "rxjs";
 import {delay, tap} from "rxjs/operators";
-import {DYNAMIC_MODULE_INITIALIZER} from "../dynamic/dynamic-module-initializer";
 import {DataComponent} from "./data.component";
+import {DYNAMIC_MODULE_INITIALIZER} from "@hatles/ngx-dynamic-router";
 
 
 export function dynamicInitializer(testService: TestService) {

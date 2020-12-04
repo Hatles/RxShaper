@@ -30,6 +30,3 @@ export * from './lib/utils/sort';
 export * from './lib/utils/eval';
 export * from './lib/utils/fromIntersectionObserver';
 export * from './lib/utils/groupBy';
-
-// anime
-export * from './lib/utils/anime'; // todo: move to standalone lib

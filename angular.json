@@ -151,6 +151,75 @@
           "style": "scss"
         }
       }
+    },
+    "common-anime": {
+      "root": "libs/common/anime",
+      "sourceRoot": "libs/common/anime/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/common/anime/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/anime/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "build": {
+          "builder": "@nrwl/node:package",
+          "options": {
+            "outputPath": "dist/libs/common/anime",
+            "tsConfig": "libs/common/anime/tsconfig.lib.json",
+            "packageJson": "libs/common/anime/package.json",
+            "main": "libs/common/anime/src/index.ts",
+            "assets": ["libs/common/anime/*.md"]
+          }
+        }
+      }
+    },
+    "common-dynamic-router": {
+      "projectType": "library",
+      "root": "libs/common/dynamic-router",
+      "sourceRoot": "libs/common/dynamic-router/src",
+      "prefix": "rxshaper",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/angular:package",
+          "options": {
+            "tsConfig": "libs/common/dynamic-router/tsconfig.lib.json",
+            "project": "libs/common/dynamic-router/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/common/dynamic-router/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["libs/common/dynamic-router/src/**/*.ts"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/dynamic-router/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      }
     }
   },
   "cli": {

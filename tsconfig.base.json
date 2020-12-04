@@ -16,7 +16,9 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@rxshaper/core": ["libs/core/src/index.ts"]
+      "@rxshaper/core": ["libs/core/src/index.ts"],
+      "@hatles/anime": ["libs/common/anime/src/index.ts"],
+      "@hatles/ngx-dynamic-router": ["libs/common/dynamic-router/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

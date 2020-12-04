@@ -6,6 +6,7 @@ import {RendererComponent} from "./components/renderer/renderer.component";
 import {BlockRendererDirective} from "./directives/block-renderer.directive";
 import {BlockRendererComponent} from "./components/block-renderer/block-renderer.component";
 import {defaultExtensions} from "./extensions/extensions";
+import {CommonModule} from "@angular/common";
 
 export function defaultRxShaperConfig(): RxShaperOptions {
   return {
@@ -17,7 +18,9 @@ export function defaultRxShaperConfig(): RxShaperOptions {
 
 
 @NgModule({
-  imports: [],
+  imports: [
+    CommonModule
+  ],
   declarations: [
     RendererComponent,
     BlockRendererComponent,

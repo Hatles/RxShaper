@@ -18,7 +18,7 @@ import {RxShaperService} from "../services/rxshaper.service";
 import {RxShaperExtensionFunction} from "../models/extension";
 import {RendererService} from "../services/renderer.service";
 import {groupBy} from "../utils/groupBy";
-import {anime} from "../utils/anime";
+import {anime} from "@hatles/anime";
 
 @Injectable()
 @RxShaperExtension("rxshaper:core:animation")

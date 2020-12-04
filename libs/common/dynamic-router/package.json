@@ -1,0 +1,11 @@
+{
+  "name": "@hatles/ngx-dynamic-router",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/core": "^10.1.6",
+    "rxjs": "^6.5.5"
+  },
+  "dependencies": {
+    "tslib": "^2.0.0"
+  }
+}

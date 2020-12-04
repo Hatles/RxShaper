@@ -1,20 +1,10 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {
-  Compiler, Component,
-  ComponentFactoryResolver, Injectable, InjectionToken,
-  Injector, ModuleWithProviders,
+  Compiler,
   NgModule,
-  NgModuleFactory, NgModuleFactoryLoader,
-  NgModuleRef, Provider,
-  StaticProvider, SystemJsNgModuleLoader
 } from '@angular/core';
 import {
-  LoadChildren,
-  PRIMARY_OUTLET,
-  Route,
-  Router,
   RouterModule,
-  RouterPreloader,
   Routes,
   ROUTES
 } from '@angular/router';
@@ -35,7 +25,7 @@ import {BlockResizerHelperDirective} from './directives/block-resizer-helper.dir
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {BarComponent} from "./bar.component";
 import {JitCompilerFactory} from "@angular/platform-browser-dynamic";
-import {DynamicRouterModule} from "./module/dynamic/dynamic-router.module";
+import {DynamicRouterModule} from "@hatles/ngx-dynamic-router";
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
