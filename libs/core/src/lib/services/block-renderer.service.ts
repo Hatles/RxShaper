@@ -6,21 +6,14 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import {
-  AnimationStyle,
   ComponentBlock,
-  ComponentBlockAnimationAction,
-  ComponentBlockAnimationActionEffect,
-  ComponentBlockAnimationActionEffectType, ComponentBlockAnimationActionProperties,
-  ComponentBlockAnimationActionType,
   ComponentBlockSelector,
-  NormalizedAnimation
 } from "../models/block";
 import {RxShaperService} from "./rxshaper.service";
 import {DOCUMENT} from "@angular/common";
 import {
-  animationFrameScheduler, BehaviorSubject,
+  BehaviorSubject,
   combineLatest,
-  fromEvent,
   Observable,
   of,
   ReplaySubject,
@@ -28,15 +21,10 @@ import {
   Subscription
 } from "rxjs";
 import {_eval} from "../utils/eval";
-import {distinctUntilChanged, filter, map, switchMap, takeUntil, tap, throttleTime} from "rxjs/operators";
+import {filter, map, switchMap} from "rxjs/operators";
 import * as rxjs from "rxjs/operators";
 import {ComponentType} from "../models/component";
-import {RxShaperExtension, RxShaperExtensionFunction} from "../models/extension";
 import {RendererService} from "./renderer.service";
-import {groupBy} from "../utils/groupBy";
-import {sort} from "../utils/sort";
-import {anime} from "../utils/anime";
-import {fromIntersectionObserver, IntersectionStatus} from "../utils/fromIntersectionObserver";
 import {RootHooks} from "../extensions/hooks/root.hooks";
 
 // Utils

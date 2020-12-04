@@ -1,12 +1,10 @@
 import {ModuleWithProviders, NgModule} from '@angular/core';
-import { CommonModule } from '@angular/common';
 import {RXSHAPER_OPTIONS, RxShaperOptions} from "./models/options";
 import {RxShaperConfig} from "./services/rxshaper.config";
 import {RxShaperService} from "./services/rxshaper.service";
 import {RendererComponent} from "./components/renderer/renderer.component";
 import {BlockRendererDirective} from "./directives/block-renderer.directive";
 import {BlockRendererComponent} from "./components/block-renderer/block-renderer.component";
-import {CoreExtension} from "./extensions/core.extension";
 import {defaultExtensions} from "./extensions/extensions";
 
 export function defaultRxShaperConfig(): RxShaperOptions {
@@ -19,7 +17,7 @@ export function defaultRxShaperConfig(): RxShaperOptions {
 
 
 @NgModule({
-  imports: [CommonModule],
+  imports: [],
   declarations: [
     RendererComponent,
     BlockRendererComponent,

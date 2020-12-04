@@ -42,7 +42,7 @@ Follow these steps to get started with RxShaper.
 1. Install RxShaper packages:
 
 ```bash
-npm install rxshaper/core
+npm install @rxshaper/core
 ```
 
 Once installed, `RxShaperModule` will be imported in the `AppModule`:
@@ -50,7 +50,7 @@ Once installed, `RxShaperModule` will be imported in the `AppModule`:
 ```ts
 import { AppComponent } from './app.component';
 import { BrowserModule, BrowserAnimationsModule } from '@angular/core';
-import { RxShaperModule } from 'rxshaper/core';
+import { RxShaperModule } from '@rxshaper/core';
 
 @NgModule({
   imports: [
@@ -80,7 +80,7 @@ For more details check [Properties and Options](./guide/properties-options). (TO
 
 ```ts
 import {Component} from '@angular/core';
-import {ComponentBlock} from "rxshaper/core";
+import {ComponentBlock} from "@rxshaper/core";
 
 @Component({
   selector: 'app',
