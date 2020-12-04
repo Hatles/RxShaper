@@ -1,8 +1,7 @@
 ------
 <div align="center">
   <a href="https://hatles.github.io/RxShaper/">
-    RxShaper
-    <!-- <img width="200" src="todo"> -->
+    <img width="200" src="https://raw.githubusercontent.com/Hatles/RxShaper/master/logo.png">
   </a>
   <br />
   JSON powered / Dynamic component engine renderer
