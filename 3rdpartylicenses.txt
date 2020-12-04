@@ -16,6 +16,10 @@ MIT
 @angular/router
 MIT
 
+@hatles/anime
+
+@hatles/ngx-dynamic-router
+
 @rxshaper/core
 
 css-loader
