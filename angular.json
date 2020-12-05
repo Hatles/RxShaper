@@ -144,6 +144,20 @@
             "jestConfig": "libs/core/jest.config.js",
             "passWithNoTests": true
           }
+        },
+        "compodoc": {
+          "builder": "@twittwer/compodoc:compodoc",
+          "options": {
+            "tsConfig": "libs\\core\\tsconfig.lib.json",
+            "outputPath": "dist\\compodoc\\core",
+            "workspaceDocs": false,
+            "name": "@rxshaper/core"
+          },
+          "configurations": {
+            "json": {
+              "exportFormat": "json"
+            }
+          }
         }
       },
       "schematics": {
@@ -180,6 +194,19 @@
             "main": "libs/common/anime/src/index.ts",
             "assets": ["libs/common/anime/*.md"]
           }
+        },
+        "compodoc": {
+          "builder": "@twittwer/compodoc:compodoc",
+          "options": {
+            "tsConfig": "libs\\common\\anime\\tsconfig.lib.json",
+            "outputPath": "dist\\compodoc\\common-anime",
+            "name": "@hatles/anime"
+          },
+          "configurations": {
+            "json": {
+              "exportFormat": "json"
+            }
+          }
         }
       }
     },
@@ -212,6 +239,19 @@
           "options": {
             "jestConfig": "libs/common/dynamic-router/jest.config.js",
             "passWithNoTests": true
+          }
+        },
+        "compodoc": {
+          "builder": "@twittwer/compodoc:compodoc",
+          "options": {
+            "tsConfig": "libs\\common\\dynamic-router\\tsconfig.lib.json",
+            "outputPath": "dist\\compodoc\\common-dynamic-router",
+            "name": "@hatles/ngx-dynamic-router"
+          },
+          "configurations": {
+            "json": {
+              "exportFormat": "json"
+            }
           }
         }
       },
