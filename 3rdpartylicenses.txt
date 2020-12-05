@@ -17,10 +17,13 @@ MIT
 MIT
 
 @hatles/anime
+MIT
 
 @hatles/ngx-dynamic-router
+MIT
 
 @rxshaper/core
+MIT
 
 css-loader
 MIT
