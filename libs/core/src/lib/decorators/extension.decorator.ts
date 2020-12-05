@@ -1,7 +1,7 @@
 import {Type} from "@angular/core";
 import {RxShaperService} from "../services/rxshaper.service";
-import {RxShaperExtension} from "@rxshaper/core";
 import {RxShaperHook} from "../models/hook";
+import {RxShaperExtension} from "../models/extension";
 
 
 export function RxShaperExtension(options: RxShaperExtension | string) {

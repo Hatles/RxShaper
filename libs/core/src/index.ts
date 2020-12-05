@@ -16,14 +16,15 @@ export * from './lib/components/renderer/renderer.component';
 // export * from './lib/directives/block-renderer.directive'; // internal
 
 // models
-export * from './lib/models/extension';
-export * from './lib/models/hook';
+export {RxShaperExtensionFunction} from './lib/models/extension';
+// export * from './lib/models/hook';
 export * from './lib/models/options';
 export * from './lib/models/component';
 export * from './lib/models/block';
 
 // decorators
 export * from './lib/decorators/block.decorator';
+export * from './lib/decorators/extension.decorator';
 
 // utils
 export * from './lib/utils/sort';

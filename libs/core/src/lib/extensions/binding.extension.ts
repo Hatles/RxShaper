@@ -6,7 +6,7 @@ import {takeUntil} from "rxjs/operators";
 import {CoreHooks, CoreHooksPriorities} from "./hooks/core.hooks";
 import {RxShaperService} from "../services/rxshaper.service";
 import {BindingScope, BlockRendererService} from "../services/block-renderer.service";
-import {RxShaperExtensionFunction} from "@rxshaper/core";
+import {RxShaperExtensionFunction} from "../models/extension";
 
 @Injectable()
 @RxShaperExtension("rxshaper:core:binding")

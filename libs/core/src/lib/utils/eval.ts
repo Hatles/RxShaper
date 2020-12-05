@@ -1,6 +1,9 @@
-import vm from "vm-browserify";
+// import vm from "vm-browserify";
+//    "vm-browserify": "^1.1.2",
 
 // const isBuffer = Buffer.isBuffer;
+
+// deprecated
 
 function merge(a, b) {
   if (!a || !b) return a;
@@ -14,6 +17,7 @@ function merge(a, b) {
 
 // Return the exports/module.exports constiable set in the content
 // content (String|VmScript): required
+// deprecated
 export function _eval(content, filename, scope, includeGlobals, resolve?: (value?: (PromiseLike<any> | any)) => void, reject?: (reason?: any) => void) {
 
   if (typeof filename !== 'string') {
@@ -95,8 +99,8 @@ export function _eval(content, filename, scope, includeGlobals, resolve?: (value
   // Evaluate the content with the given scope
   if (typeof content === 'string') {
     const stringScript = content.replace(/^#!.*/, '');
-    const script = new vm.Script(stringScript, options);
-    script.runInNewContext(sandbox, options);
+    // const script = new vm.Script(stringScript, options);
+    // script.runInNewContext(sandbox, options);
   } else {
     content.runInNewContext(sandbox, options);
   }

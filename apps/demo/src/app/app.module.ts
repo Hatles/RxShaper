@@ -12,7 +12,6 @@ import {
 import {AppComponent} from './app.component';
 import {FooComponent} from './foo.component';
 import {CustomThingComponent} from "./custom-thing.component";
-import {BuilderComponent} from './components/builder/builder.component';
 import {BlockComponent} from './components/block/block.component';
 import {ChildrenHostDirective} from './directives/children-host.directive';
 import {RXSHAPER_OPTIONS, RxShaperCoreModule, RxShaperOptions} from "@rxshaper/core";
@@ -25,7 +24,7 @@ import {BlockResizerHelperDirective} from './directives/block-resizer-helper.dir
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {BarComponent} from "./bar.component";
 import {JitCompilerFactory} from "@angular/platform-browser-dynamic";
-import {DynamicRouterModule} from "@hatles/ngx-dynamic-router";
+import {NgxDynamicRouterModule} from "@hatles/ngx-dynamic-router";
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
@@ -102,7 +101,7 @@ export function buildRoutesFactory(compiler: Compiler): Routes {
 }
 
 @NgModule({
-  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, BarComponent, CustomThingComponent, BuilderComponent, ChildrenHostDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
+  declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, BarComponent, CustomThingComponent, ChildrenHostDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
@@ -113,14 +112,13 @@ export function buildRoutesFactory(compiler: Compiler): Routes {
       //   component: FooComponent,
       // },
     ]),
-    DynamicRouterModule.forRoot(),
+    NgxDynamicRouterModule.forRoot(),
     RxShaperCoreModule.forRoot(),
   ],
   providers: [
     TestWrapper,
     {provide: RXSHAPER_OPTIONS, multi: true, useFactory: defaultRxShaperConfig, deps: []},
     {provide: RXSHAPER_OPTIONS, multi: true, useFactory: buildRxShaperConfig, deps: [TestWrapper]},
-    // {provide: JitCompiler, useFactory: buildCompilerFactory, deps: [JitCompilerFactory]},
     {provide: ROUTES, multi: true, useFactory: buildRoutesFactory, deps: [Compiler]}
   ],
   bootstrap: [AppComponent],

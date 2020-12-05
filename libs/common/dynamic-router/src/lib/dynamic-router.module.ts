@@ -21,12 +21,15 @@ export function fixRouterPreLoaderFactory(preloader: RouterPreloader | any, dyna
   imports: [RouterModule],
   declarations: [
     EmptyOutletComponent
-  ]
+  ],
+  entryComponents: [
+    EmptyOutletComponent
+  ],
 })
-export class DynamicRouterModule {
-  static forRoot(): ModuleWithProviders<DynamicRouterModule> {
+export class NgxDynamicRouterModule {
+  static forRoot(): ModuleWithProviders<NgxDynamicRouterModule> {
     return {
-      ngModule: DynamicRouterModule,
+      ngModule: NgxDynamicRouterModule,
       providers: [
         DynamicModuleLoader
       ],
