@@ -1,7 +1,5 @@
 # @hatles/anime
 
-This library was generated with [Nx](https://nx.dev).
+Typescript animation engine
 
-## Running unit tests
-
-Run `ng test common-anime` to execute the unit tests via [Jest](https://jestjs.io).
+Rewrite of [anime.js](https://github.com/juliangarnier/anime) library.

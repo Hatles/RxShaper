@@ -1,4 +1,28 @@
 {
   "name": "@hatles/anime",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Debard Etienne <etienne.debard01@gmail.com>",
+  "contributors": [
+    "Debard Etienne <etienne.debard01@gmail.com>"
+  ],
+  "description": "Typescript animation engine",
+  "keywords": [
+    "anime",
+    "animation",
+    "javascript",
+    "typescript",
+    "CSS",
+    "transforms",
+    "SVG",
+    "canvas"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatles/RxShaper.git",
+    "directory": "libs/commonn/anime"
+  },
+  "bugs": {
+    "url": "https://github.com/hatles/RxShaper/issues"
+  }
 }

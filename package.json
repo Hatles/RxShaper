@@ -1,7 +1,11 @@
 {
   "name": "rxshaper",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "license": "MIT",
+  "author": "Debard Etienne <etienne.debard01@gmail.com>",
+  "contributors": [
+    "Debard Etienne <etienne.debard01@gmail.com>"
+  ],
   "scripts": {
     "ng": "nx",
     "postinstall": "node ./decorate-angular-cli.js && ngcc --properties es2015 browser module main --first-only --create-ivy-entry-points",
@@ -26,6 +30,22 @@
     "workspace-schematic": "nx workspace-schematic",
     "dep-graph": "nx dep-graph",
     "help": "nx help"
+  },
+  "keywords": [
+    "angular",
+    "builder",
+    "rxshaper",
+    "RxShaper",
+    "angular builder",
+    "dynamic builder",
+    "builder library",
+    "renderer",
+    "block renderer"
+  ],
+  "description": "RxShaper is a dynamic (JSON powered) component engine renderer for Angular",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatles/RxShaper.git"
   },
   "private": true,
   "dependencies": {

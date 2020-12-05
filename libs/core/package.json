@@ -1,6 +1,30 @@
 {
   "name": "@rxshaper/core",
   "version": "0.0.1",
+  "license": "MIT",
+  "author": "Debard Etienne <etienne.debard01@gmail.com>",
+  "contributors": [
+    "Debard Etienne <etienne.debard01@gmail.com>"
+  ],
+  "description": "RxShaper is a dynamic (JSON powered) component engine renderer for Angular",
+  "keywords": [
+    "angular",
+    "builder",
+    "rxshaper",
+    "RxShaper",
+    "angular builder",
+    "dynamic builder",
+    "builder library",
+    "renderer",
+    "block renderer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatles/RxShaper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hatles/RxShaper/issues"
+  },
   "peerDependencies": {
     "@angular/common": "^10.1.6",
     "@angular/core": "^10.1.6",

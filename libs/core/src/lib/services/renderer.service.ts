@@ -3,7 +3,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 import {distinctUntilChanged, map} from "rxjs/operators";
 import {BlockRendererService} from "./block-renderer.service";
 
-export const RXSHAPER_VIEWPORT = new InjectionToken<HTMLElement | any>('RXSHAPER_VIEWPORT');
+export const RXSHAPER_VIEWPORT = new InjectionToken<any>('RXSHAPER_VIEWPORT');
 
 export interface RendererState {
   [key: string]: BlockRendererService
@@ -38,7 +38,7 @@ export class RendererService {
   private store: RendererStore<RendererState>;
   private rootBlockRenderer: BlockRendererService;
 
-  constructor(@Inject(RXSHAPER_VIEWPORT) public viewport: HTMLElement | any) {
+  constructor(@Inject(RXSHAPER_VIEWPORT) public viewport: any) {
     this.store = new RendererStore<RendererState>({});
   }
 

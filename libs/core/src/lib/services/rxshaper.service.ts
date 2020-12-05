@@ -6,6 +6,10 @@ import {RxShaperExtensionNormalized, RxShaperExtensionOption} from "../models/op
 import {sort} from "../utils/sort";
 import {RxShaperHook} from "../models/hook";
 
+function getExtension(type: any): RxShaperExtension {
+  return RxShaperService.Extensions.find(e => e.class === type);
+}
+
 @Injectable()
 export class RxShaperService {
   // todo: remove static definition of component from decorators from here
@@ -14,9 +18,6 @@ export class RxShaperService {
   static Components: ComponentType[] = [];
   static HooksStore: { class: Type<any>, hooks: RxShaperHook[] }[] = [];
   static Extensions: RxShaperExtension[] = [];
-  static getExtension(type: any): RxShaperExtension {
-    return this.Extensions.find(e => e.class === type);
-  }
 
   extensions: RxShaperExtensionOption[];
   normalizedExtensions: RxShaperExtensionNormalized[];
@@ -37,7 +38,7 @@ export class RxShaperService {
       hooks: null,
     };
     if(extension instanceof Type) {
-      const extensionDef = RxShaperService.getExtension(extension);
+      const extensionDef = getExtension(extension);
       normalizedExtension.extension = extensionDef;
       normalizedExtension.name = extensionDef.name;
       normalizedExtension.priority = extensionDef.priority;
@@ -50,7 +51,7 @@ export class RxShaperService {
       };
     }
     if (!normalizedExtension.extension) {
-      normalizedExtension.extension = RxShaperService.getExtension(normalizedExtension.type);
+      normalizedExtension.extension = getExtension(normalizedExtension.type);
     }
     if (!normalizedExtension.instance) {
       normalizedExtension.instance = this.buildExtensionInstance(normalizedExtension);

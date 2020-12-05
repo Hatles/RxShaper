@@ -1,6 +1,28 @@
 {
   "name": "@hatles/ngx-dynamic-router",
   "version": "0.0.1",
+  "license": "MIT",
+  "author": "Debard Etienne <etienne.debard01@gmail.com>",
+  "contributors": [
+    "Debard Etienne <etienne.debard01@gmail.com>"
+  ],
+  "description": "Extension to Angular router that give access to asynchronous module initializers",
+  "keywords": [
+    "ngx",
+    "angular",
+    "router",
+    "dynamic router",
+    "dynamic-router",
+    "ngx-dynamic-router"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hatles/RxShaper.git",
+    "directory": "libs/commonn/dynamic-router"
+  },
+  "bugs": {
+    "url": "https://github.com/hatles/RxShaper/issues"
+  },
   "peerDependencies": {
     "@angular/core": "^10.1.6",
     "rxjs": "^6.5.5"

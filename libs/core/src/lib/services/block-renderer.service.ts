@@ -314,6 +314,8 @@ export class BlockRendererService {
 
   isRoot: boolean;
 
+  public document: Document;
+
   /**
    * @param container
    * @param resolver
@@ -329,11 +331,12 @@ export class BlockRendererService {
     public resolver: ComponentFactoryResolver,
     public injector: Injector,
     public renderer: Renderer2,
-    @Inject(DOCUMENT) public document: Document,
+    @Inject(DOCUMENT) document: any,
     private shaper: RxShaperService,
     private shaperManager: RendererService,
     @Optional() @SkipSelf() public parent?: BlockRendererService,
   ) {
+    this.document = document as Document;
   }
 
   onInit(component: ComponentBlock, root: boolean = false): void {
