@@ -1,0 +1,9 @@
+[
+  {
+    "path": "http",
+    "component": "data",
+    "options": {
+      "data": "http"
+    }
+  }
+]
