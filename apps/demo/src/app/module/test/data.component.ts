@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
-import {TestService} from "./test.service";
 import {ActivatedRoute} from "@angular/router";
 
 @Component({
-  selector: 'test',
+  selector: 'data',
   template: '<span>{{data}}</span>',
 })
 export class DataComponent {

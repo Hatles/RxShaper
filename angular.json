@@ -21,8 +21,14 @@
             "polyfills": "apps/demo/src/polyfills.ts",
             "tsConfig": "apps/demo/tsconfig.app.json",
             "aot": true,
-            "assets": ["apps/demo/src/favicon.ico", "apps/demo/src/assets"],
-            "styles": ["apps/demo/src/styles.scss"],
+            "assets": [
+              "apps/demo/src/favicon.ico",
+              "apps/demo/src/assets"
+            ],
+            "styles": [
+              "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+              "apps/demo/src/styles.scss"
+            ],
             "scripts": []
           },
           "configurations": {
@@ -76,7 +82,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["apps/demo/src/**/*.ts"]
+            "lintFilePatterns": [
+              "apps/demo/src/**/*.ts"
+            ]
           }
         },
         "test": {
@@ -109,7 +117,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["apps/demo-e2e/**/*.{js,ts}"]
+            "lintFilePatterns": [
+              "apps/demo-e2e/**/*.{js,ts}"
+            ]
           }
         }
       }
@@ -135,7 +145,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/core/src/**/*.ts"]
+            "lintFilePatterns": [
+              "libs/core/src/**/*.ts"
+            ]
           }
         },
         "test": {
@@ -175,7 +187,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/common/anime/**/*.ts"]
+            "lintFilePatterns": [
+              "libs/common/anime/**/*.ts"
+            ]
           }
         },
         "test": {
@@ -192,7 +206,9 @@
             "tsConfig": "libs/common/anime/tsconfig.lib.json",
             "packageJson": "libs/common/anime/package.json",
             "main": "libs/common/anime/src/index.ts",
-            "assets": ["libs/common/anime/*.md"]
+            "assets": [
+              "libs/common/anime/*.md"
+            ]
           }
         },
         "compodoc": {
@@ -231,7 +247,9 @@
         "lint": {
           "builder": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["libs/common/dynamic-router/src/**/*.ts"]
+            "lintFilePatterns": [
+              "libs/common/dynamic-router/src/**/*.ts"
+            ]
           }
         },
         "test": {
@@ -252,6 +270,46 @@
             "json": {
               "exportFormat": "json"
             }
+          }
+        }
+      },
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      }
+    },
+    "common-rxpager": {
+      "projectType": "library",
+      "root": "libs/common/rxpager",
+      "sourceRoot": "libs/common/rxpager/src",
+      "prefix": "rxshaper",
+      "architect": {
+        "build": {
+          "builder": "@nrwl/angular:package",
+          "options": {
+            "tsConfig": "libs/common/rxpager/tsconfig.lib.json",
+            "project": "libs/common/rxpager/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/common/rxpager/tsconfig.lib.prod.json"
+            }
+          }
+        },
+        "lint": {
+          "builder": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/common/rxpager/src/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "options": {
+            "jestConfig": "libs/common/rxpager/jest.config.js",
+            "passWithNoTests": true
           }
         }
       },

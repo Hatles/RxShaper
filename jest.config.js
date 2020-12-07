@@ -4,5 +4,6 @@ module.exports = {
     '<rootDir>/libs/core',
     '<rootDir>/libs/common/anime',
     '<rootDir>/libs/common/dynamic-router',
+    '<rootDir>/libs/common/rxpager',
   ],
 };

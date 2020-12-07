@@ -3,6 +3,8 @@ import {Router, RouterModule, RouterPreloader} from "@angular/router";
 import {DynamicRouterConfigLoader, NgRouterConfigLoader, RouterConfigLoader} from "./dynamic-router-config-loader";
 import {DynamicModuleLoader} from "./dynamic-module-loader";
 import {EmptyOutletComponent} from "./components/empty-outlet.component";
+import {AsyncItemRegistry, provideAsyncInitializer} from "./async-initializer";
+import {provideAsyncPageInitializer} from "@hatles/rxpager";
 
 export function fixRouterConfigLoader(loader: NgRouterConfigLoader, dynamicLoader: DynamicModuleLoader): RouterConfigLoader {
   return new DynamicRouterConfigLoader(loader, dynamicLoader);
@@ -31,7 +33,20 @@ export class NgxDynamicRouterModule {
     return {
       ngModule: NgxDynamicRouterModule,
       providers: [
-        DynamicModuleLoader
+        DynamicModuleLoader,
+
+        AsyncItemRegistry,
+        provideAsyncInitializer(),
+      ],
+    };
+  }
+
+  static forChild(): ModuleWithProviders<NgxDynamicRouterModule> {
+    return {
+      ngModule: NgxDynamicRouterModule,
+      providers: [
+        AsyncItemRegistry,
+        provideAsyncInitializer(),
       ],
     };
   }

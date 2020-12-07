@@ -18,13 +18,7 @@
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e",
-          "compodoc"
-        ]
+        "cacheableOperations": ["build", "lint", "test", "e2e", "compodoc"]
       }
     }
   },
@@ -34,9 +28,7 @@
     },
     "demo-e2e": {
       "tags": [],
-      "implicitDependencies": [
-        "demo"
-      ]
+      "implicitDependencies": ["demo"]
     },
     "core": {
       "tags": []
@@ -45,6 +37,9 @@
       "tags": []
     },
     "common-dynamic-router": {
+      "tags": []
+    },
+    "common-rxpager": {
       "tags": []
     }
   }

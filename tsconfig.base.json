@@ -18,7 +18,8 @@
     "paths": {
       "@rxshaper/core": ["libs/core/src/index.ts"],
       "@hatles/anime": ["libs/common/anime/src/index.ts"],
-      "@hatles/ngx-dynamic-router": ["libs/common/dynamic-router/src/index.ts"]
+      "@hatles/ngx-dynamic-router": ["libs/common/dynamic-router/src/index.ts"],
+      "@hatles/rxpager": ["libs/common/rxpager/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

@@ -43,8 +43,11 @@ export class DynamicRouterConfigLoader implements RouterConfigLoader {
 
       const module = factory.create(parentInjector);
 
-      return from(this.dynamicLoader.load(module)).pipe(map((module) => {
-        return new LoadedRouterConfig(flatten(module.injector.get(ROUTES)).map(standardizeConfig), module);
+      return from(this.dynamicLoader.load(module)).pipe(map((m) => {
+        if (!m) {
+          m = module; // fix undefined module if no Module initializer
+        }
+        return new LoadedRouterConfig(flatten(m.injector.get(ROUTES)).map(standardizeConfig), m);
       }));
     }));
   }

@@ -1,7 +1,9 @@
-import {Injectable, NgModuleRef} from "@angular/core";
+import {Injectable, NgModuleRef, StaticProvider} from "@angular/core";
 import {DYNAMIC_MODULE_INITIALIZER} from "./dynamic-module-initializer";
 import {forkJoin, from, Observable, of} from "rxjs";
 import {map} from "rxjs/operators";
+import {DynamicModuleRef} from "./dynamic-module-ref";
+import {ROUTES} from "@angular/router";
 
 @Injectable()
 export class DynamicModuleLoader {
@@ -22,7 +24,13 @@ export class DynamicModuleLoader {
         return of(initResult);
       });
 
-      return forkJoin(allInits).pipe(map(() => moduleRef)).toPromise();
+      return forkJoin(allInits).pipe(map((providersList) => {
+        // const providers: StaticProvider[] = providersList.reduce((acc, p) => [...(acc || []), ...(p || [])], []) as StaticProvider[];
+
+        const dynamicModule = new DynamicModuleRef<T>(moduleRef);
+
+        return dynamicModule;
+      })).toPromise();
     }
 
     return new Promise(resolve => resolve(moduleRef));

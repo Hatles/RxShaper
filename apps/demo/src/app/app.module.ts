@@ -4,6 +4,7 @@ import {
   NgModule,
 } from '@angular/core';
 import {
+  Route,
   RouterModule,
   Routes,
   ROUTES
@@ -21,10 +22,12 @@ import {WrapperTestComponent} from "./components/wrapper-test/wrapper-test.compo
 import {TestWrapper} from "./services/test.wrapper";
 import {WrapperBlockBoundingsComponent} from './components/wrapper-block-boundings/wrapper-block-boundings.component';
 import {BlockResizerHelperDirective} from './directives/block-resizer-helper.directive';
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {BarComponent} from "./bar.component";
 import {JitCompilerFactory} from "@angular/platform-browser-dynamic";
 import {NgxDynamicRouterModule} from "@hatles/ngx-dynamic-router";
+import {RxPagerModule} from "@hatles/rxpager";
+import {HttpClientModule} from "@angular/common/http";
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 export function buildRxShaperConfig(wrapper: TestWrapper): RxShaperOptions {
   const rxShaperConfig: RxShaperOptions = {
@@ -100,20 +103,56 @@ export function buildRoutesFactory(compiler: Compiler): Routes {
   ];
 }
 
+export const DOC_ROUTES: Route[] = [
+  // {
+  //   path: 'guides',
+  //   loadChildren: () => import('./modules/guide-list').then(m => m.GuideListModule)
+  // },
+  {
+    path: 'guide/:id',
+    loadChildren: () => import('./modules/guide-viewer/guide-viewer').then(m => m.GuideViewerModule)
+  },
+];
+
 @NgModule({
   declarations: [WrapperTestComponent, BoxBlock, TextBlock, BlockComponent, AppComponent, FooComponent, BarComponent, CustomThingComponent, ChildrenHostDirective, WrapperBlockBoundingsComponent, BlockResizerHelperDirective],
   entryComponents: [CustomThingComponent],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule, // required for animations
-    RouterModule.forRoot([
-      // {
-      //   path: '**',
-      //   component: FooComponent,
-      // },
-    ]),
+    HttpClientModule,
+    RouterModule.forRoot(DOC_ROUTES,
+      {
+      scrollPositionRestoration: 'enabled',
+      anchorScrolling: 'enabled',
+      relativeLinkResolution: 'corrected'
+    }),
     NgxDynamicRouterModule.forRoot(),
+    RxPagerModule.forRoot([
+        {
+          path: 'foo2',
+          component: 'foo',
+        },
+        {
+          path: 'bar2',
+          component: 'bar',
+        },
+      ],
+      {
+        components: [
+          {
+            name: 'foo',
+            type: FooComponent,
+          },
+          {
+            name: 'bar',
+            type: BarComponent,
+          },
+        ]
+      }),
+
     RxShaperCoreModule.forRoot(),
+
+    BrowserAnimationsModule,
   ],
   providers: [
     TestWrapper,
